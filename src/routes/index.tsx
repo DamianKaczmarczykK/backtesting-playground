@@ -44,8 +44,8 @@ export default function Home() {
   const [markers, setMarkers] = createSignal<any>([]);
   const [currentView, setCurrentView] = createSignal(HomeView.EDITOR);
 
-  const inactiveClass = "shrink-0 border border-transparent p-3 text-sm font-medium text-gray-500 hover:text-gray-700";
-  const activeClass = "shrink-0 rounded-t-lg border border-gray-300 border-b-white p-3 text-sm font-medium text-sky-600";
+  const inactiveNavClass = "shrink-0 border border-transparent p-3 text-sm font-medium text-gray-500 hover:text-gray-700";
+  const activeNavClass = "shrink-0 rounded-t-lg border border-gray-300 border-b-white p-3 text-sm font-medium text-sky-600";
 
   onMount(() => {
     const data = importFromCsv();
@@ -71,11 +71,11 @@ export default function Home() {
             <div class="border-b border-gray-200">
               <nav class="-mb-px flex gap-6">
                 <a href="#"
-                  class={currentView() === HomeView.EDITOR ? activeClass : inactiveClass}
+                  class={currentView() === HomeView.EDITOR ? activeNavClass : inactiveNavClass}
                   onClick={() => setCurrentView(HomeView.EDITOR)}
                 >Editor</a>
                 <a href="#"
-                  class={currentView() === HomeView.BACKTESTING_REPORT ? activeClass : inactiveClass}
+                  class={currentView() === HomeView.BACKTESTING_REPORT ? activeNavClass : inactiveNavClass}
                   onClick={() => setCurrentView(HomeView.BACKTESTING_REPORT)}
                 >Backtesting report</a>
               </nav>

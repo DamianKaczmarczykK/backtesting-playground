@@ -1,7 +1,7 @@
 import { onMount } from "solid-js";
 import "./Editor.css";
 
-export default function Editor(props) {
+export default function Editor(props: any) {
 
   const onEdit = (content: string) => props.onEdit(content);
   const defaultContent = () => props.defaultContent;

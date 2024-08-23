@@ -2,6 +2,28 @@ import { Show, createSignal, onMount } from "solid-js";
 import { BacktestingReport, DEFAULT_STRATEGY, MarketData, Strategy, runBacktesting } from "./BacktestingEngine";
 import Editor from "./Editor";
 
+function NumericInput(props: any) {
+  const value = props.value;
+  const setValue = props.setValue;
+  const name = () => props.name;
+
+  return (
+    <div class="flex items-center gap-1">
+      <label>{name()}
+        <input
+          type="number"
+          id="InitialBalance"
+          value={value()}
+          onChange={(e: any) => {
+            setValue(e.currentTarget.value)
+          }}
+          class="h-10 w-16 rounded border-gray-200 text-center [-moz-appearance:_textfield] sm:text-sm [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+        />
+      </label>
+    </div>
+  );
+}
+
 export function StrategyEditor(props: any) {
 
   const setBacktestingReport = (backtestingReport: BacktestingReport) => props.setBacktestingReport(backtestingReport);
@@ -17,38 +39,17 @@ export function StrategyEditor(props: any) {
   const [strategyCode, setStrategyCode] = createSignal(DEFAULT_STRATEGY);
 
   const [initialBalance, setInitialBalance] = createSignal<number>(10000);
+  const [commission, setCommission] = createSignal<number>(0.00);
 
   return (
     <div>
 
       <div>
-
-        <div class="flex items-center gap-1">
-          <label for="InitialBalance">Initial balance</label>
-          <button type="button" class="size-10 leading-10 text-gray-600 transition hover:opacity-75">
-            &minus;
-          </button>
-
-          <input
-            type="number"
-            id="InitialBalance"
-            value={initialBalance()}
-            onChange={(e: any) => {
-              setInitialBalance(e.currentTarget.value)
-            }}
-            class="h-10 w-16 rounded border-gray-200 text-center [-moz-appearance:_textfield] sm:text-sm [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
-          />
-
-          <button type="button" class="size-10 leading-10 text-gray-600 transition hover:opacity-75">
-            &plus;
-          </button>
-        </div>
+        <NumericInput value={initialBalance} setValue={setInitialBalance} name="Initial balance" />
+        <NumericInput value={commission} setValue={setCommission} name="Commission" />
       </div>
 
-
-
       <a
-        class="group relative inline-block text-sm font-medium text-indigo-600 focus:outline-none focus:ring active:text-indigo-500"
         href="#"
         onClick={() => {
           try {
@@ -61,6 +62,7 @@ export function StrategyEditor(props: any) {
             const backtestingAccount = {
               initialBalance: initialBalance(),
               currentBalance: initialBalance(),
+              commission: commission(),
               openPositions: [],
               closedPositions: []
             };
@@ -78,8 +80,7 @@ export function StrategyEditor(props: any) {
         }
         }
       >
-        <span class="absolute inset-0 translate-x-0.5 translate-y-0.5 bg-indigo-600 transition-transform group-hover:translate-x-0 group-hover:translate-y-0" ></span>
-        <span class="relative block border border-current bg-white px-8 py-3">Run strategy</span>
+        <span class="mt-4 block border border-current bg-gray-100 px-8 py-3">Run strategy</span>
       </a>
 
       <Editor
@@ -87,7 +88,7 @@ export function StrategyEditor(props: any) {
         defaultContent={DEFAULT_STRATEGY} />
 
       <Show when={backtestingError()}>
-        <div class="bg-red-700">
+        <div class="my-4 bg-red-700 text-gray-100">
           {backtestingError()}
         </div>
       </Show>

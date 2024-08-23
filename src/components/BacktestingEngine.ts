@@ -3,7 +3,7 @@ type Price = number;
 type Quantity = number;
 
 export interface TOHLCV {
-	timestamp: Timestamp,
+	time: Timestamp,
 	open: Price,
 	high: Price,
 	low: Price,
@@ -29,28 +29,30 @@ export function profit(closePosition: ClosePosition): number {
 export interface Account {
 	initialBalance: Quantity,
 	currentBalance: Quantity,
+	// ISSUE: currently unsupported
+	commission: number,
 	openPositions: OpenPosition[],
 	closedPositions: ClosePosition[]
 }
 
-function openPosition(account: Account, price: Price, timestamp: Timestamp, quantity: Quantity): void {
-	const positionValue = price * quantity;
+function openPosition(account: Account, price: Price, time: Timestamp, quantity: Quantity): void {
 	account.openPositions.push({
-		startDate: timestamp,
+		startDate: time,
 		startPrice: price,
 		quantity: quantity
 	});
+	const positionValue = price * quantity;
 	account.currentBalance -= positionValue;
 }
 
-function closeAllPositions(account: Account, price: Price, timestamp: Timestamp): void {
+function closeAllPositions(account: Account, price: Price, time: Timestamp): void {
 	for (let openPosition of account.openPositions) {
 		const positionValue = (price * openPosition.quantity);
 		account.closedPositions.push({
 			startDate: openPosition.startDate,
 			startPrice: openPosition.startPrice,
 			quantity: openPosition.quantity,
-			endDate: timestamp,
+			endDate: time,
 			endPrice: price,
 		});
 		account.currentBalance += positionValue;
@@ -96,23 +98,22 @@ export function runBacktesting(strategy: Strategy, marketData: MarketData, accou
 
 	for (let index = 0; index < length; index++) {
 		const currentCandle = marketData.at(index);
+		const requestedQuantity = strategy(index, marketData);
 
-		const strategyResult = strategy(index, marketData);
-
-		if (strategyResult === 0.0) {
+		if (requestedQuantity === 0.0) {
 			continue;
-		} else if (strategyResult > 0) {
-			const positionValue = currentCandle.close * strategyResult;
+		} else if (requestedQuantity > 0) {
+			const positionValue = currentCandle.close * requestedQuantity;
 			if (account.openPositions.length > 0) {
 				console.warn("[BACKTESTING] There are too many opened positions");
 			} else if (positionValue > account.currentBalance) {
 				console.warn("[BACKTESTING] Position value bigger than current balance");
 			}
 			else {
-				openPosition(account, currentCandle.close, currentCandle.timestamp, strategyResult);
+				openPosition(account, currentCandle.close, currentCandle.time, requestedQuantity);
 			}
 		} else {
-			closeAllPositions(account, currentCandle.close, currentCandle.timestamp);
+			closeAllPositions(account, currentCandle.close, currentCandle.time);
 		}
 	}
 
@@ -120,6 +121,7 @@ export function runBacktesting(strategy: Strategy, marketData: MarketData, accou
 	return {
 		initialBalance: account.initialBalance,
 		currentBalance: account.currentBalance,
+		commission: account.commission,
 		openPositions: account.openPositions,
 		closedPositions: account.closedPositions
 	};

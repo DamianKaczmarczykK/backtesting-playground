@@ -63,16 +63,6 @@ export default function BacktestingReportComponent(props: any) {
   let chart: IChartApi;
   let candlestickSeries: any;
 
-  const data = () => marketData().map((candle: TOHLCV) => {
-    return {
-      time: candle.timestamp,
-      open: candle.open,
-      high: candle.high,
-      low: candle.low,
-      close: candle.close
-    }
-  });
-
   onMount(() => {
     chart = createChart(chartDiv, {
       height: 500,
@@ -87,7 +77,7 @@ export default function BacktestingReportComponent(props: any) {
     });
 
     candlestickSeries = chart.addCandlestickSeries();
-    candlestickSeries.setData(data());
+    candlestickSeries.setData(marketData());
     candlestickSeries.setMarkers(markers());
   });
 
