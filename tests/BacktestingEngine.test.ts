@@ -24,7 +24,7 @@ test('Run backtesting for 2021-2022 BTC/USD data', () => {
 	const strategy = (broker: Broker) => {
 		const currentCandle = broker.marketData.last(0);
 		if (currentCandle.close < 30000.0) {
-			broker.buy(0.1);
+			broker.marketBuy(0.1);
 		} else if (currentCandle.close > 60000.0) {
 			broker.closeAll();
 		}

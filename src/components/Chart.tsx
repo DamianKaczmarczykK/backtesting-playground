@@ -9,7 +9,7 @@ export default function Chart(props: any) {
 
   const data = () => marketData().map((e: TOHLCV) => {
     return {
-      time: e.timestamp,
+      time: e.time,
       open: e.open,
       high: e.high,
       low: e.low,

@@ -54,31 +54,27 @@ export class Broker {
 		this.closedPositions = [];
 	}
 
-	public buy(quantity: Quantity) {
+	public marketBuy(quantity: Quantity) {
 		const currentCandle = this.marketData.last(0);
 		// OPTIMIZE: calculated double times
 		const positionValue = currentCandle.close * quantity;
-		if (this.openPositions.length > 0) {
-			console.warn("[BACKTESTING] There are too many opened positions");
-		} else if (positionValue > this.currentBalance) {
+		// TODO: check what margin is sufficient
+		if (positionValue > this.currentBalance) {
 			console.warn("[BACKTESTING] Position value bigger than current balance");
-		}
-		else {
+		} else {
 			this.openPosition(PositionType.BUY, currentCandle.close, currentCandle.time, quantity);
 		}
 	}
 
 	// TODO: add guards
-	public sell(quantity: Quantity) {
+	public marketSell(quantity: Quantity) {
 		const currentCandle = this.marketData.last(0);
 		// OPTIMIZE: calculated double times
 		const positionValue = currentCandle.close * quantity;
-		if (this.openPositions.length > 0) {
-			console.warn("[BACKTESTING] There are too many opened positions");
-		} else if (positionValue > this.currentBalance) {
+		// TODO: check what margin is sufficient
+		if (positionValue > this.currentBalance) {
 			console.warn("[BACKTESTING] Position value bigger than current balance");
-		}
-		else {
+		} else {
 			this.openPosition(PositionType.SELL, currentCandle.close, currentCandle.time, quantity);
 		}
 	}
@@ -168,14 +164,14 @@ export const DEFAULT_STRATEGY_SELL = "window['strategy'] = (broker) => {\n\
     if (currentCandle.close < 30000.0) {\n\
         broker.closeAll();\n\
     } else if (currentCandle.close > 60000.0) {\n\
-        broker.sell(0.1);\n\
+        broker.marketSell(0.1);\n\
     }\n\
 };"
 
 export const DEFAULT_STRATEGY = "window['strategy'] = (broker) => {\n\
     const currentCandle = broker.marketData.last(0);\n\
     if (currentCandle.close < 30000.0) {\n\
-        broker.buy(0.1);\n\
+        broker.marketBuy(0.1);\n\
     } else if (currentCandle.close > 60000.0) {\n\
         broker.closeAll();\n\
     }\n\
