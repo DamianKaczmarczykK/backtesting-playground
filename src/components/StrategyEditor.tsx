@@ -65,7 +65,17 @@ export function StrategyEditor(props: any) {
                 </DialogDescription>
               </DialogHeader>
 
+              <label
+                for="market-data-input"
+                style="border: 1px solid #ccc;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;"
+              >
+                {importedData()?.label ? importedData()?.label : 'Select file...'}
+              </label>
               <input
+                style="display: none"
                 type="file"
                 id="market-data-input"
                 onChange={(e: any) => {
