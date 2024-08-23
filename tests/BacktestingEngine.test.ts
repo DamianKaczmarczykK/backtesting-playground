@@ -1,4 +1,4 @@
-import { importFromCsv } from '../src/components/DataImporter';
+import { importBtcUsdJson } from '../src/components/DataImporter';
 import { ClosedPosition, Broker, MarketData, PositionType, profitWithoutCommission, runBacktesting } from '../src/components/BacktestingEngine';
 import { expect, test } from 'vitest'
 
@@ -30,7 +30,7 @@ test('Run backtesting for 2021-2022 BTC/USD data', () => {
 			broker.closeAll();
 		}
 	};
-	const marketData = new MarketData((importFromCsv()));
+	const marketData = new MarketData((importBtcUsdJson()));
 	const broker = new Broker(marketData, 10_000, 0);
 
 	// when

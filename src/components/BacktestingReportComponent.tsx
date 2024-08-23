@@ -3,6 +3,7 @@ import { BacktestingReport, ClosedPosition, PositionType, profitWithoutCommissio
 import { IChartApi, createChart } from "lightweight-charts";
 import { BadgeDelta } from "./ui/badge-delta";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { selectedMarketData } from "./EditorStore";
 
 function Arrow(props: any) {
   const backtestingReport = () => props.backtestingReport;
@@ -23,7 +24,6 @@ function Arrow(props: any) {
 export default function BacktestingReportComponent(props: any) {
   const backtestingReport = () => props.backtestingReport;
 
-  const marketData = () => props.marketData;
   const markers = () => props.markers || [];
 
   let chartDiv: HTMLDivElement;
@@ -44,7 +44,7 @@ export default function BacktestingReportComponent(props: any) {
     });
 
     candlestickSeries = chart.addCandlestickSeries();
-    candlestickSeries.setData(marketData());
+    candlestickSeries.setData(selectedMarketData().value);
     candlestickSeries.setMarkers(markers());
   });
 
@@ -85,6 +85,7 @@ export default function BacktestingReportComponent(props: any) {
           <TableCaption></TableCaption>
           <TableHeader>
             <TableRow>
+              <TableHead class="text-center">#</TableHead>
               <TableHead class="text-center">Type</TableHead>
               <TableHead class="text-center">Start date</TableHead>
               <TableHead class="text-center">End date</TableHead>
@@ -99,6 +100,7 @@ export default function BacktestingReportComponent(props: any) {
               <TableRow onmouseover={(_e: MouseEvent) => {
                 chart.setCrosshairPosition(elem.startPrice, elem.startDate, candlestickSeries);
               }} >
+                <TableCell>{elem.id}</TableCell>
                 <TableCell>{PositionType[elem.type]}</TableCell>
                 <TableCell>{elem.startDate}</TableCell>
                 <TableCell>{elem.endDate}</TableCell>

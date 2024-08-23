@@ -1,21 +1,42 @@
 import { Show, createSignal } from "solid-js";
-import { Broker as Broker, BacktestingReport, MarketData, Strategy, runBacktesting, EXAMPLE_STRATEGIES } from "./BacktestingEngine";
+import { Broker as Broker, BacktestingReport, MarketData, Strategy, runBacktesting } from "./BacktestingEngine";
 import Editor from "./Editor";
-import { backtestingOptions, setBacktestingOptions, strategyCode } from "./EditorStore";
+import { MarketDataSelection, backtestingOptions, marketDatas, selectedMarketData, setBacktestingOptions, setSelectedMarketData, strategyCode } from "./EditorStore";
 import { Button } from "./ui/button";
 import { NumberField, NumberFieldDecrementTrigger, NumberFieldDescription, NumberFieldIncrementTrigger, NumberFieldInput, NumberFieldLabel } from "./ui/number-field";
 import { Callout, CalloutContent, CalloutTitle } from "./ui/callout";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 export function StrategyEditor(props: any) {
 
   const setBacktestingReport = (backtestingReport: BacktestingReport) => props.setBacktestingReport(backtestingReport);
-  const marketData = () => props.marketData;
 
   const [backtestingError, setBacktestingError] = createSignal<string | null>(null);
 
   return (
     <div>
       <div class="flex">
+
+        { /**  FIX: add validation error on empty selection and add description */}
+        <div class="w-1/3">
+          <h1>Import market data</h1>
+          <Select
+            options={marketDatas()}
+            value={selectedMarketData()}
+            onChange={(option) => { console.log(option); setSelectedMarketData(option); }}
+            optionTextValue="label"
+            optionValue="label"
+            optionDisabled="disabled"
+            placeholder="Select market data"
+            itemComponent={(props) => <SelectItem item={props.item}>{props.item.rawValue.label}</SelectItem>}
+          >
+            <SelectTrigger aria-label="Market data">
+              <SelectValue<MarketDataSelection>>{(state) => state.selectedOption().label}</SelectValue>
+            </SelectTrigger>
+            <SelectContent />
+          </Select>
+        </div>
+
         <div class="w-1/3">
           <NumberField
             defaultValue={backtestingOptions.initialBalance}
@@ -48,7 +69,7 @@ export function StrategyEditor(props: any) {
           <Button
             onClick={() => {
               try {
-                const importedData = new MarketData(marketData());
+                const importedData = new MarketData(selectedMarketData().value);
                 console.log(strategyCode);
                 // HACK: Jesus Christ, it's taking string input, declares global variable and assign evaluated result to it - then it can be passed in rest of the code
                 eval(strategyCode.value);
