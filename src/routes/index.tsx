@@ -20,7 +20,7 @@ function prepareMarkers(backtestingReport: BacktestingReport): any {
           position: 'belowBar',
           color: '#0af047',
           shape: 'arrowUp',
-          text: 'BUY'
+          text: `BUY ${position.id}`
         }
       } else {
         return {
@@ -28,7 +28,7 @@ function prepareMarkers(backtestingReport: BacktestingReport): any {
           position: 'aboveBar',
           color: '#f0890c',
           shape: 'arrowDown',
-          text: 'SELL'
+          text: `SELL ${position.id}`
         }
       }
     });
@@ -40,7 +40,7 @@ function prepareMarkers(backtestingReport: BacktestingReport): any {
         position: 'aboveBar',
         color: '#bb00fa',
         shape: 'arrowDown',
-        text: `CLOSE`
+        text: `CLOSE ${position.id}`
       }
     });
   let markersTotal = markersFromBuy.concat(markersFromClose);

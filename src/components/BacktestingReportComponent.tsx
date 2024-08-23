@@ -1,5 +1,5 @@
 import { For, Show, onMount } from "solid-js";
-import { BacktestingReport, ClosedPosition, OpenPosition, PositionType, profitWithoutCommission } from "./BacktestingEngine";
+import { BacktestingReport, ClosedPosition, PositionType, profitWithoutCommission } from "./BacktestingEngine";
 import { IChartApi, createChart } from "lightweight-charts";
 
 function UpArrow(props: any) {

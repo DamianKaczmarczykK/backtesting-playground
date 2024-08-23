@@ -3,6 +3,7 @@ import { ClosedPosition, Broker, MarketData, PositionType, profitWithoutCommissi
 import { expect, test } from 'vitest'
 
 const closePosition: ClosedPosition = {
+	id: 1,
 	startDate: '2020-01-01',
 	startPrice: 100,
 	endDate: '2020-01-02',

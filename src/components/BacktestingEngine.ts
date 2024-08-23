@@ -12,6 +12,7 @@ export interface TOHLCV {
 }
 
 export interface OpenPosition {
+	id: number,
 	startDate: Timestamp,
 	startPrice: Price,
 	quantity: Quantity,
@@ -37,6 +38,7 @@ export function profitWithoutCommission(closePosition: ClosedPosition): number {
 }
 
 export class Broker {
+	private idSequence: number;
 	marketData: MarketData;
 
 	initialBalance: Quantity;
@@ -46,6 +48,7 @@ export class Broker {
 	closedPositions: ClosedPosition[];
 
 	constructor(marketData: MarketData, initialBalance: Quantity, commissionPercentage: number) {
+		this.idSequence = 1;
 		this.marketData = marketData;
 		this.initialBalance = initialBalance;
 		this.currentBalance = initialBalance;
@@ -86,6 +89,7 @@ export class Broker {
 
 	openPosition(type: PositionType, price: Price, time: Timestamp, quantity: Quantity): void {
 		this.openPositions.push({
+			id: this.idSequence,
 			startDate: time,
 			startPrice: price,
 			quantity: quantity,
@@ -96,11 +100,13 @@ export class Broker {
 		// FIX: correctly calculate commission
 		const commissionValue = 0
 		this.currentBalance -= (positionValue + commissionValue);
+		this.idSequence += 1;
 	}
 
 	closeAllPositions(price: Price, time: Timestamp): void {
 		for (let openPosition of this.openPositions) {
 			const closedPosition = {
+				id: openPosition.id,
 				startDate: openPosition.startDate,
 				startPrice: openPosition.startPrice,
 				quantity: openPosition.quantity,
