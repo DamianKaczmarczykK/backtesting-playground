@@ -26,39 +26,49 @@ export function profitWithoutCommission(closePosition: ClosedPosition): number {
 	return (closePosition.endPrice - closePosition.startPrice) * closePosition.quantity;
 }
 
-export interface Account {
-	initialBalance: Quantity,
-	currentBalance: Quantity,
-	commissionPercentage: number,
-	openPositions: OpenPosition[],
-	closedPositions: ClosedPosition[]
-}
+export class FuturesAccount {
+	initialBalance: Quantity;
+	currentBalance: Quantity;
+	commissionPercentage: number;
+	openPositions: OpenPosition[];
+	closedPositions: ClosedPosition[];
 
-function openPosition(account: Account, price: Price, time: Timestamp, quantity: Quantity): void {
-	account.openPositions.push({
-		startDate: time,
-		startPrice: price,
-		quantity: quantity
-	});
-	const positionValue = price * quantity;
-	const commissionValue = positionValue * account.commissionPercentage;
-	account.currentBalance -= (positionValue + commissionValue);
-}
-
-function closeAllPositions(account: Account, price: Price, time: Timestamp): void {
-	for (let openPosition of account.openPositions) {
-		account.closedPositions.push({
-			startDate: openPosition.startDate,
-			startPrice: openPosition.startPrice,
-			quantity: openPosition.quantity,
-			endDate: time,
-			endPrice: price,
-		});
-		const positionValue = (price * openPosition.quantity);
-		const commissionValue = positionValue * account.commissionPercentage;
-		account.currentBalance += (positionValue - commissionValue);
+	constructor(initialBalance: Quantity, commissionPercentage: number) {
+		this.initialBalance = initialBalance;
+		this.currentBalance = initialBalance;
+		this.commissionPercentage = commissionPercentage;
+		this.openPositions = [];
+		this.closedPositions = [];
 	}
-	account.openPositions = [];
+
+	openPosition(price: Price, time: Timestamp, quantity: Quantity): void {
+		this.openPositions.push({
+			startDate: time,
+			startPrice: price,
+			quantity: quantity
+		});
+		const positionValue = price * quantity;
+		// FIX: correctly calculate commission
+		const commissionValue = positionValue * this.commissionPercentage;
+		this.currentBalance -= (positionValue + commissionValue);
+	}
+
+	closeAllPositions(price: Price, time: Timestamp): void {
+		for (let openPosition of this.openPositions) {
+			this.closedPositions.push({
+				startDate: openPosition.startDate,
+				startPrice: openPosition.startPrice,
+				quantity: openPosition.quantity,
+				endDate: time,
+				endPrice: price,
+			});
+			const positionValue = (price * openPosition.quantity);
+			// FIX: correctly calculate commission
+			const commissionValue = positionValue * this.commissionPercentage;
+			this.currentBalance += (positionValue - commissionValue);
+		}
+		this.openPositions = [];
+	}
 }
 
 export interface BacktestingReport {
@@ -99,7 +109,7 @@ export const DEFAULT_STRATEGY = "window['strategy'] = (index, marketData) => {\n
     return 0.0;\n\
 };"
 
-export function runBacktesting(strategy: Strategy, marketData: MarketData, account: Account): BacktestingReport {
+export function runBacktesting(strategy: Strategy, marketData: MarketData, account: FuturesAccount): BacktestingReport {
 	console.time("backtesting")
 	const length = marketData.length();
 
@@ -117,10 +127,10 @@ export function runBacktesting(strategy: Strategy, marketData: MarketData, accou
 				console.warn("[BACKTESTING] Position value bigger than current balance");
 			}
 			else {
-				openPosition(account, currentCandle.close, currentCandle.time, requestedQuantity);
+				account.openPosition(currentCandle.close, currentCandle.time, requestedQuantity);
 			}
 		} else {
-			closeAllPositions(account, currentCandle.close, currentCandle.time);
+			account.closeAllPositions(currentCandle.close, currentCandle.time);
 		}
 	}
 

@@ -1,5 +1,5 @@
 import { Show, createSignal, onMount } from "solid-js";
-import { BacktestingReport, DEFAULT_STRATEGY, MarketData, Strategy, runBacktesting } from "./BacktestingEngine";
+import { FuturesAccount, BacktestingReport, DEFAULT_STRATEGY, MarketData, Strategy, runBacktesting } from "./BacktestingEngine";
 import Editor from "./Editor";
 
 function NumericInput(props: any) {
@@ -58,13 +58,7 @@ export function StrategyEditor(props: any) {
             const strategy: Strategy = window['strategy']
 
             // TODO: move below part to separated function/class
-            const backtestingAccount = {
-              initialBalance: initialBalance(),
-              currentBalance: initialBalance(),
-              commissionPercentage: commission(),
-              openPositions: [],
-              closedPositions: []
-            };
+            const backtestingAccount = new FuturesAccount(initialBalance(), commission());
             const backtestingResult = runBacktesting(strategy, importedData, backtestingAccount);
             console.log(backtestingResult);
             setBacktestingReport(backtestingResult);
