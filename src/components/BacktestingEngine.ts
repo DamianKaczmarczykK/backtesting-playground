@@ -14,7 +14,8 @@ export interface TOHLCV {
 export interface OpenPosition {
 	startDate: Timestamp,
 	startPrice: Price,
-	quantity: Quantity
+	quantity: Quantity,
+	type: PositionType
 }
 
 export interface ClosedPosition extends OpenPosition {
@@ -22,18 +23,26 @@ export interface ClosedPosition extends OpenPosition {
 	endPrice: Price
 }
 
+export enum PositionType {
+	BUY,
+	SELL
+}
+
 export function profitWithoutCommission(closePosition: ClosedPosition): number {
 	return (closePosition.endPrice - closePosition.startPrice) * closePosition.quantity;
 }
 
-export class FuturesAccount {
+export class Broker {
+	marketData: MarketData;
+
 	initialBalance: Quantity;
 	currentBalance: Quantity;
 	commissionPercentage: number;
 	openPositions: OpenPosition[];
 	closedPositions: ClosedPosition[];
 
-	constructor(initialBalance: Quantity, commissionPercentage: number) {
+	constructor(marketData: MarketData, initialBalance: Quantity, commissionPercentage: number) {
+		this.marketData = marketData;
 		this.initialBalance = initialBalance;
 		this.currentBalance = initialBalance;
 		this.commissionPercentage = commissionPercentage;
@@ -41,11 +50,36 @@ export class FuturesAccount {
 		this.closedPositions = [];
 	}
 
-	openPosition(price: Price, time: Timestamp, quantity: Quantity): void {
+	public buy(quantity: Quantity) {
+		const currentCandle = this.marketData.last(0);
+		const positionValue = currentCandle.close * quantity;
+		if (this.openPositions.length > 0) {
+			console.warn("[BACKTESTING] There are too many opened positions");
+		} else if (positionValue > this.currentBalance) {
+			console.warn("[BACKTESTING] Position value bigger than current balance");
+		}
+		else {
+			this.openPosition(PositionType.BUY, currentCandle.close, currentCandle.time, quantity);
+		}
+	}
+
+	// TODO: add guards
+	public sell(quantity: Quantity) {
+		const currentCandle = this.marketData.last(0);
+		this.openPosition(PositionType.SELL, currentCandle.close, currentCandle.time, quantity);
+	}
+
+	public closeAll() {
+		const currentCandle = this.marketData.last(0);
+		this.closeAllPositions(currentCandle.close, currentCandle.time);
+	}
+
+	openPosition(type: PositionType, price: Price, time: Timestamp, quantity: Quantity): void {
 		this.openPositions.push({
 			startDate: time,
 			startPrice: price,
-			quantity: quantity
+			quantity: quantity,
+			type: type
 		});
 		const positionValue = price * quantity;
 		// FIX: correctly calculate commission
@@ -59,6 +93,7 @@ export class FuturesAccount {
 				startDate: openPosition.startDate,
 				startPrice: openPosition.startPrice,
 				quantity: openPosition.quantity,
+				type: openPosition.type,
 				endDate: time,
 				endPrice: price,
 			});
@@ -104,54 +139,34 @@ export class MarketData {
 }
 
 export interface Strategy {
-	(marketData: MarketData): Quantity
+	(broker: Broker): void
 }
 
-export const DEFAULT_STRATEGY = "window['strategy'] = (marketData) => {\n\
-    const currentCandle = marketData.last(0);\n\
+export const DEFAULT_STRATEGY = "window['strategy'] = (broker) => {\n\
+    const currentCandle = broker.marketData.last(0);\n\
     if (currentCandle.close < 30000.0) {\n\
-        return 0.1;\n\
+        broker.buy(0.1);\n\
     } else if (currentCandle.close > 60000.0) {\n\
-        return -0.1;\n\
+        broker.closeAll();\n\
     }\n\
-    return 0.0;\n\
 };"
 
-export function runBacktesting(strategy: Strategy, marketData: MarketData, account: FuturesAccount): BacktestingReport {
+export function runBacktesting(strategy: Strategy, broker: Broker): BacktestingReport {
 	console.time("backtesting")
 
 	let iterator;
+	const marketData = broker.marketData;
 	do {
-		const requestedQuantity = strategy(marketData);
-		const currentCandle = marketData.last(0);
-
-		if (requestedQuantity === 0.0) {
-			// NOTE: do nothing
-		} else if (requestedQuantity > 0) {
-			// NOTE: open BUY position
-			const positionValue = currentCandle.close * requestedQuantity;
-			if (account.openPositions.length > 0) {
-				console.warn("[BACKTESTING] There are too many opened positions");
-			} else if (positionValue > account.currentBalance) {
-				console.warn("[BACKTESTING] Position value bigger than current balance");
-			}
-			else {
-				account.openPosition(currentCandle.close, currentCandle.time, requestedQuantity);
-			}
-		} else {
-			// NOTE: close all positions
-			account.closeAllPositions(currentCandle.close, currentCandle.time);
-		}
-
+		strategy(broker);
 		iterator = marketData.next();
 	} while (!iterator.done)
 
 	console.timeEnd("backtesting")
 	return {
-		initialBalance: account.initialBalance,
-		equity: account.currentBalance,
-		commissionPercentage: account.commissionPercentage,
-		openPositions: account.openPositions,
-		closedPositions: account.closedPositions
+		initialBalance: broker.initialBalance,
+		equity: broker.currentBalance,
+		commissionPercentage: broker.commissionPercentage,
+		openPositions: broker.openPositions,
+		closedPositions: broker.closedPositions
 	};
 }

@@ -1,5 +1,5 @@
-import { Show, createSignal, onMount } from "solid-js";
-import { FuturesAccount, BacktestingReport, MarketData, Strategy, runBacktesting } from "./BacktestingEngine";
+import { Show, createSignal } from "solid-js";
+import { Broker as Broker, BacktestingReport, MarketData, Strategy, runBacktesting } from "./BacktestingEngine";
 import Editor from "./Editor";
 import { backtestingOptions, setBacktestingOptions, strategyCode } from "./EditorStore";
 
@@ -48,14 +48,13 @@ export function StrategyEditor(props: any) {
           try {
             const importedData = new MarketData(marketData());
             console.log(strategyCode);
-            console.log(importedData);
             // HACK: Jesus Christ, it's taking string input, declares global variable and assign evaluated result to it - then it can be passed in rest of the code
             eval(strategyCode.value);
             const strategy: Strategy = window['strategy']
 
             // TODO: move below part to separated function/class
-            const backtestingAccount = new FuturesAccount(backtestingOptions.initialBalance, backtestingOptions.commissionPercentage);
-            const backtestingResult = runBacktesting(strategy, importedData, backtestingAccount);
+            const broker = new Broker(importedData, backtestingOptions.initialBalance, backtestingOptions.commissionPercentage);
+            const backtestingResult = runBacktesting(strategy, broker);
             console.log(backtestingResult);
             setBacktestingReport(backtestingResult);
             setBacktestingError(null);

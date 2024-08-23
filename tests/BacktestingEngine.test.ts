@@ -1,5 +1,5 @@
 import { importFromCsv } from '../src/components/DataImporter';
-import { ClosedPosition, FuturesAccount, MarketData, profitWithoutCommission, runBacktesting } from '../src/components/BacktestingEngine';
+import { ClosedPosition, Broker, MarketData, PositionType, profitWithoutCommission, runBacktesting } from '../src/components/BacktestingEngine';
 import { expect, test } from 'vitest'
 
 const closePosition: ClosedPosition = {
@@ -7,7 +7,8 @@ const closePosition: ClosedPosition = {
 	startPrice: 100,
 	endDate: '2020-01-02',
 	endPrice: 200,
-	quantity: 0.1
+	quantity: 0.1,
+	type: PositionType.BUY
 };
 
 
@@ -20,20 +21,19 @@ test('Profit without commissions hould be 10', () => {
 
 test('Run backtesting for 2021-2022 BTC/USD data', () => {
 	// given
-	const strategy = (marketData: MarketData) => {
-		const currentCandle = marketData.last(0);
+	const strategy = (broker: Broker) => {
+		const currentCandle = broker.marketData.last(0);
 		if (currentCandle.close < 30000.0) {
-			return 0.1;
+			broker.buy(0.1);
 		} else if (currentCandle.close > 60000.0) {
-			return -0.1;
+			broker.closeAll();
 		}
-		return 0.0;
 	};
 	const marketData = new MarketData((importFromCsv()));
-	const account = new FuturesAccount(10_000, 0);
+	const broker = new Broker(marketData, 10_000, 0);
 
 	// when
-	const backtestingReport = runBacktesting(strategy, marketData, account);
+	const backtestingReport = runBacktesting(strategy, broker);
 
 	// then
 	expect(backtestingReport.initialBalance).toBe(10_000);

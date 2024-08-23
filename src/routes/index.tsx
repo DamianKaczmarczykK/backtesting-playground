@@ -11,7 +11,7 @@ enum HomeView {
 }
 
 function prepareMarkers(backtestingReport: BacktestingReport): any {
-  const markersFromPositions = backtestingReport.closedPositions
+  const markersFromBuy = backtestingReport.closedPositions
     .map((position: ClosedPosition) => {
       return {
         time: position.startDate,
@@ -22,17 +22,17 @@ function prepareMarkers(backtestingReport: BacktestingReport): any {
       }
     });
 
-  const markersFromPositions2 = backtestingReport.closedPositions
+  const markersFromClose = backtestingReport.closedPositions
     .map((position: ClosedPosition) => {
       return {
         time: position.endDate,
         position: 'aboveBar',
-        color: '#f00a21',
+        color: '#bb00fa',
         shape: 'arrowDown',
-        text: 'SELL'
+        text: `CLOSE`
       }
     });
-  let markersTotal = markersFromPositions.concat(markersFromPositions2);
+  let markersTotal = markersFromBuy.concat(markersFromClose);
   markersTotal.sort((a, b) => a.time.localeCompare(b.time));
   return markersTotal;
 }
