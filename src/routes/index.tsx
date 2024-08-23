@@ -1,6 +1,7 @@
 import { createSignal } from "solid-js";
-import { Account, Strategy, TOHLCV, runStrategy } from "~/components/BacktestingEngine";
+import { Account, Strategy, runStrategy } from "~/components/BacktestingEngine";
 import { importFromCsv } from "~/components/DataImporter";
+import Editor from "~/components/Editor"
 
 export default function Home() {
 
@@ -11,23 +12,28 @@ export default function Home() {
     closedPositions: []
   }
 
-  const codePrefix = "window['strategy'] = (index, data) => {"
-  const codeSuffix = "};"
-
   const [backtestingReport, setBacktestingReport] = createSignal(account);
-  const [strategyCode, setStrategyCode] = createSignal("const currentCandle = data[index]; if (currentCandle.close < 30_000.0) {return 0.1; } else if (currentCandle.close > 60_000.0) { return -0.1; } return 0.0;");
-
+  const [strategyCode, setStrategyCode] = createSignal(
+    "window['strategy'] = (index, data) => {\n\
+    const currentCandle = data[index];\n\
+    if (currentCandle.close < 30000.0) {\n\
+        return 0.1;\n\
+    } else if (currentCandle.close > 60000.0) {\n\
+        return -0.1;\n\
+    }\n\
+    return 0.0;\n\
+};"
+  );
 
   return (
     <main class="text-center mx-auto p-4">
       <div class="flex flex-col">
-        <textarea placeholder="Write strategy here" textContent={strategyCode()} onInput={(e) => {
-          setStrategyCode(e.currentTarget.value);
-        }}></textarea>
+        <Editor onEdit={(content: string) => setStrategyCode(content)} />
         <button onClick={() => {
           try {
             const importedData = importFromCsv();
-            console.log(eval(codePrefix + strategyCode() + codeSuffix));
+            console.log(strategyCode());
+            console.log(eval(strategyCode()));
             // HACK: Jesus Christ, it's taking string input, declares global variable and assign evaluated result to it - then it can be passed in rest of the code
             const strategy: Strategy = window['strategy']
             const backtestingResult = runStrategy(strategy, importedData, account);
