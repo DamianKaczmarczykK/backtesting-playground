@@ -8,12 +8,6 @@ export function StrategyEditor(props: any) {
   const setBacktestingReport = (backtestingReport: BacktestingReport) => props.setBacktestingReport(backtestingReport);
   const marketData = () => props.marketData;
 
-  let importedData: MarketData;
-
-  onMount(() => {
-    importedData = new MarketData(marketData());
-  });
-
   const [backtestingError, setBacktestingError] = createSignal<string | null>(null);
 
   return (
@@ -52,7 +46,9 @@ export function StrategyEditor(props: any) {
       <button
         onClick={() => {
           try {
+            const importedData = new MarketData(marketData());
             console.log(strategyCode);
+            console.log(importedData);
             // HACK: Jesus Christ, it's taking string input, declares global variable and assign evaluated result to it - then it can be passed in rest of the code
             eval(strategyCode.value);
             const strategy: Strategy = window['strategy']

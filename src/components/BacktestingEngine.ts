@@ -80,27 +80,35 @@ export interface BacktestingReport {
 }
 
 export class MarketData {
-	data: TOHLCV[];
+	private index: number;
+	private data: TOHLCV[];
 
 	public constructor(data: TOHLCV[]) {
+		this.index = 0;
 		this.data = data;
 	}
 
-	public at(index: number): TOHLCV {
-		return this.data[index];
+	next() {
+		if (this.index + 1 >= this.data.length) {
+			return { value: this.data[this.index], done: true };
+		}
+		const result = { value: this.data[this.index], done: false };
+		this.index += 1;
+		return result;
 	}
 
-	public length(): number {
-		return this.data.length;
+	public last(index: number): TOHLCV {
+		const dataIndex = (this.index - index);
+		return this.data[dataIndex];
 	}
 }
 
 export interface Strategy {
-	(index: number, marketData: MarketData): Quantity
+	(marketData: MarketData): Quantity
 }
 
-export const DEFAULT_STRATEGY = "window['strategy'] = (index, marketData) => {\n\
-    const currentCandle = marketData.at(index);\n\
+export const DEFAULT_STRATEGY = "window['strategy'] = (marketData) => {\n\
+    const currentCandle = marketData.last(0);\n\
     if (currentCandle.close < 30000.0) {\n\
         return 0.1;\n\
     } else if (currentCandle.close > 60000.0) {\n\
@@ -111,15 +119,16 @@ export const DEFAULT_STRATEGY = "window['strategy'] = (index, marketData) => {\n
 
 export function runBacktesting(strategy: Strategy, marketData: MarketData, account: FuturesAccount): BacktestingReport {
 	console.time("backtesting")
-	const length = marketData.length();
 
-	for (let index = 0; index < length; index++) {
-		const currentCandle = marketData.at(index);
-		const requestedQuantity = strategy(index, marketData);
+	let iterator;
+	do {
+		const requestedQuantity = strategy(marketData);
+		const currentCandle = marketData.last(0);
 
 		if (requestedQuantity === 0.0) {
-			continue;
+			// NOTE: do nothing
 		} else if (requestedQuantity > 0) {
+			// NOTE: open BUY position
 			const positionValue = currentCandle.close * requestedQuantity;
 			if (account.openPositions.length > 0) {
 				console.warn("[BACKTESTING] There are too many opened positions");
@@ -130,9 +139,12 @@ export function runBacktesting(strategy: Strategy, marketData: MarketData, accou
 				account.openPosition(currentCandle.close, currentCandle.time, requestedQuantity);
 			}
 		} else {
+			// NOTE: close all positions
 			account.closeAllPositions(currentCandle.close, currentCandle.time);
 		}
-	}
+
+		iterator = marketData.next();
+	} while (!iterator.done)
 
 	console.timeEnd("backtesting")
 	return {
