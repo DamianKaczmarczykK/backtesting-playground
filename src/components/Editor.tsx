@@ -1,10 +1,8 @@
 import { onMount } from "solid-js";
 import "./Editor.css";
+import { setStrategyCode, strategyCode } from "./EditorStore";
 
-export default function Editor(props: any) {
-
-  const onEdit = (content: string) => props.onEdit(content);
-  const defaultContent = () => props.defaultContent;
+export default function Editor() {
 
   let editor: any;
 
@@ -23,10 +21,10 @@ export default function Editor(props: any) {
 
     editor.setFontSize(24);
     editor.resize();
-    editor.setValue(defaultContent());
+    editor.setValue(strategyCode.value);
     editor.on("beforeEndOperation", function(e: any) {
       if (editor.curOp.docChanged) {
-        onEdit(editor.getValue());
+        setStrategyCode({ value: editor.getValue() });
       }
     });
   });

@@ -1,29 +1,7 @@
 import { Show, createSignal, onMount } from "solid-js";
-import { FuturesAccount, BacktestingReport, DEFAULT_STRATEGY, MarketData, Strategy, runBacktesting } from "./BacktestingEngine";
+import { FuturesAccount, BacktestingReport, MarketData, Strategy, runBacktesting } from "./BacktestingEngine";
 import Editor from "./Editor";
-
-function NumericInput(props: any) {
-  const value = props.value;
-  const setValue = props.setValue;
-  const name = () => props.name;
-  const id = () => props.id;
-
-  return (
-    <div class="flex items-center gap-1">
-      <label>{name()}
-        <input
-          type="number"
-          id={id()}
-          value={value()}
-          onChange={(e: any) => {
-            setValue(e.currentTarget.value)
-          }}
-          class="h-10 w-16 rounded border-gray-200 text-center [-moz-appearance:_textfield] sm:text-sm [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
-        />
-      </label>
-    </div>
-  );
-}
+import { backtestingOptions, setBacktestingOptions, strategyCode } from "./EditorStore";
 
 export function StrategyEditor(props: any) {
 
@@ -37,28 +15,50 @@ export function StrategyEditor(props: any) {
   });
 
   const [backtestingError, setBacktestingError] = createSignal<string | null>(null);
-  const [strategyCode, setStrategyCode] = createSignal(DEFAULT_STRATEGY);
-
-  const [initialBalance, setInitialBalance] = createSignal<number>(10000);
-  const [commission, setCommission] = createSignal<number>(0.005);
 
   return (
     <div>
       <div>
-        <NumericInput value={initialBalance} setValue={setInitialBalance} name="Initial balance" id="initialBalance" />
-        <NumericInput value={commission} setValue={setCommission} name="Commission" id="commission" />
+
+        <div class="flex items-center gap-1">
+          <label>Initial balance
+            <input
+              type="number"
+              id="initial-balance"
+              value={backtestingOptions.initialBalance}
+              onChange={(e: any) =>
+                setBacktestingOptions({ ...backtestingOptions, initialBalance: e.currentTarget.value })
+              }
+              class="h-10 w-16 rounded border-gray-200 text-center [-moz-appearance:_textfield] sm:text-sm [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+            />
+          </label>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <label>Commission
+            <input
+              type="number"
+              id="commission"
+              value={backtestingOptions.commissionPercentage}
+              onChange={(e: any) =>
+                setBacktestingOptions({ ...backtestingOptions, commissionPercentage: e.currentTarget.value })
+              }
+              class="h-10 w-16 rounded border-gray-200 text-center [-moz-appearance:_textfield] sm:text-sm [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+            />
+          </label>
+        </div>
       </div>
 
       <button
         onClick={() => {
           try {
-            console.log(strategyCode());
+            console.log(strategyCode);
             // HACK: Jesus Christ, it's taking string input, declares global variable and assign evaluated result to it - then it can be passed in rest of the code
-            eval(strategyCode());
+            eval(strategyCode.value);
             const strategy: Strategy = window['strategy']
 
             // TODO: move below part to separated function/class
-            const backtestingAccount = new FuturesAccount(initialBalance(), commission());
+            const backtestingAccount = new FuturesAccount(backtestingOptions.initialBalance, backtestingOptions.commissionPercentage);
             const backtestingResult = runBacktesting(strategy, importedData, backtestingAccount);
             console.log(backtestingResult);
             setBacktestingReport(backtestingResult);
@@ -76,9 +76,7 @@ export function StrategyEditor(props: any) {
         <span class="mt-4 block border border-current bg-gray-100 px-8 py-3">Run strategy</span>
       </button>
 
-      <Editor
-        onEdit={(content: string) => setStrategyCode(content)}
-        defaultContent={DEFAULT_STRATEGY} />
+      <Editor />
 
       <Show when={backtestingError()}>
         <div class="my-4 bg-red-700 text-gray-100">

@@ -72,7 +72,6 @@ export default function BacktestingReportComponent(props: any) {
   const marketData = () => props.marketData;
   const markers = () => props.markers || [];
 
-
   let chartDiv: HTMLDivElement;
   let chart: IChartApi;
   let candlestickSeries: any;
