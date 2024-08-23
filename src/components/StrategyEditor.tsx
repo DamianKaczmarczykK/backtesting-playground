@@ -71,6 +71,7 @@ export function StrategyEditor(props: any) {
             }
           >Run strategy
           </Button>
+
         </div>
 
         <div class="ml-8 grow">
@@ -84,7 +85,6 @@ export function StrategyEditor(props: any) {
           </Show>
         </div>
       </div>
-
 
 
       <Editor />

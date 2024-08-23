@@ -1,10 +1,13 @@
-import { onMount } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import "./Editor.css";
 import { setStrategyCode, strategyCode } from "./EditorStore";
+import { Button } from "./ui/button";
 
 export default function Editor() {
 
   let editor: any;
+
+  const [isFullscreen, setIsFullscreen] = createSignal(false);
 
   onMount(async () => {
     const ace = await import("brace");
@@ -20,16 +23,23 @@ export default function Editor() {
     // editor.setOption("enableSnippets", true);
 
     editor.setFontSize(24);
-    editor.resize();
     editor.setValue(strategyCode.value);
     editor.on("beforeEndOperation", function(e: any) {
       if (editor.curOp.docChanged) {
         setStrategyCode({ value: editor.getValue() });
       }
     });
+
+    editor.resize();
   });
 
   return (
-    <div id="editor"></div>
+    <div>
+      <div class={isFullscreen() ? "editor-container-fullscreen" : "editor-container"}>
+        <div id="editor"></div>
+      </div>
+      <Button class="absolute bottom-8 right-8"
+        onClick={() => setIsFullscreen((val) => { editor.resize(); return !val })}>Fullscreen</Button>
+    </div>
   );
 }
