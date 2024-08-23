@@ -2,6 +2,9 @@ import { Show, createSignal } from "solid-js";
 import { Broker as Broker, BacktestingReport, MarketData, Strategy, runBacktesting } from "./BacktestingEngine";
 import Editor from "./Editor";
 import { backtestingOptions, setBacktestingOptions, strategyCode } from "./EditorStore";
+import { Button } from "./ui/button";
+import { NumberField, NumberFieldDecrementTrigger, NumberFieldDescription, NumberFieldIncrementTrigger, NumberFieldInput, NumberFieldLabel } from "./ui/number-field";
+import { Callout, CalloutContent, CalloutTitle } from "./ui/callout";
 
 export function StrategyEditor(props: any) {
 
@@ -12,72 +15,80 @@ export function StrategyEditor(props: any) {
 
   return (
     <div>
-      <div>
+      <div class="flex">
+        <div class="w-1/3">
+          <NumberField
+            defaultValue={backtestingOptions.initialBalance}
+            onRawValueChange={(value) => setBacktestingOptions({ ...backtestingOptions, initialBalance: value })}
+            minValue={0}>
+            <NumberFieldLabel>Initial balance</NumberFieldLabel>
+            <div class="relative">
+              <NumberFieldInput />
+              <NumberFieldIncrementTrigger />
+              <NumberFieldDecrementTrigger />
+            </div>
+            <NumberFieldDescription>Your investement capital</NumberFieldDescription>
+          </NumberField>
 
-        <div class="flex items-center gap-1">
-          <label>Initial balance
-            <input
-              type="number"
-              id="initial-balance"
-              value={backtestingOptions.initialBalance}
-              onChange={(e: any) =>
-                setBacktestingOptions({ ...backtestingOptions, initialBalance: e.currentTarget.value })
+          {/* FIX: add step 0.001 for commission  */}
+          <NumberField
+            class="my-4"
+            defaultValue={backtestingOptions.commissionPercentage}
+            onRawValueChange={(value) => setBacktestingOptions({ ...backtestingOptions, commissionPercentage: value })}
+            minValue={0}>
+            <NumberFieldLabel>Commission</NumberFieldLabel>
+            <div class="relative">
+              <NumberFieldInput />
+              <NumberFieldIncrementTrigger />
+              <NumberFieldDecrementTrigger />
+            </div>
+            <NumberFieldDescription>Commission taken on every open/close position</NumberFieldDescription>
+          </NumberField>
+
+          <Button
+            onClick={() => {
+              try {
+                const importedData = new MarketData(marketData());
+                console.log(strategyCode);
+                // HACK: Jesus Christ, it's taking string input, declares global variable and assign evaluated result to it - then it can be passed in rest of the code
+                eval(strategyCode.value);
+                const strategy: Strategy = window['strategy']
+
+                // TODO: move below part to separated function/class
+                const broker = new Broker(importedData, backtestingOptions.initialBalance, backtestingOptions.commissionPercentage);
+                const backtestingResult = runBacktesting(strategy, broker);
+                console.log(backtestingResult);
+                setBacktestingReport(backtestingResult);
+                setBacktestingError(null);
               }
-              class="h-10 w-16 rounded border-gray-200 text-center [-moz-appearance:_textfield] sm:text-sm [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
-            />
-          </label>
+              catch (e) {
+                if (e instanceof Error) {
+                  setBacktestingError(`${e.name}: ${e.message}`);
+                  console.error(e);
+                }
+              }
+            }
+            }
+          >Run strategy
+          </Button>
         </div>
 
-        <div class="flex items-center gap-1">
-          <label>Commission
-            <input
-              type="number"
-              id="commission"
-              value={backtestingOptions.commissionPercentage}
-              onChange={(e: any) =>
-                setBacktestingOptions({ ...backtestingOptions, commissionPercentage: e.currentTarget.value })
-              }
-              class="h-10 w-16 rounded border-gray-200 text-center [-moz-appearance:_textfield] sm:text-sm [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
-            />
-          </label>
+        <div class="ml-8 grow">
+          <Show when={backtestingError()}>
+            <Callout variant="error" class="my-4">
+              <CalloutTitle>Error in strategy</CalloutTitle>
+              <CalloutContent>
+                {backtestingError()}
+              </CalloutContent>
+            </Callout>
+          </Show>
         </div>
       </div>
 
-      <button
-        onClick={() => {
-          try {
-            const importedData = new MarketData(marketData());
-            console.log(strategyCode);
-            // HACK: Jesus Christ, it's taking string input, declares global variable and assign evaluated result to it - then it can be passed in rest of the code
-            eval(strategyCode.value);
-            const strategy: Strategy = window['strategy']
 
-            // TODO: move below part to separated function/class
-            const broker = new Broker(importedData, backtestingOptions.initialBalance, backtestingOptions.commissionPercentage);
-            const backtestingResult = runBacktesting(strategy, broker);
-            console.log(backtestingResult);
-            setBacktestingReport(backtestingResult);
-            setBacktestingError(null);
-          }
-          catch (e) {
-            if (e instanceof Error) {
-              setBacktestingError(`${e.name}: ${e.message}`);
-              console.error(e);
-            }
-          }
-        }
-        }
-      >
-        <span class="mt-4 block border border-current bg-gray-100 px-8 py-3">Run strategy</span>
-      </button>
 
       <Editor />
 
-      <Show when={backtestingError()}>
-        <div class="my-4 bg-red-700 text-gray-100">
-          {backtestingError()}
-        </div>
-      </Show>
     </div>
   );
 }
