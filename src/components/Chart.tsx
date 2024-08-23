@@ -1,19 +1,50 @@
-import { onCleanup, onMount } from "solid-js";
+import { createChart } from "lightweight-charts";
+import { onMount } from "solid-js";
+import { TOHLCV } from "./BacktestingEngine";
 
-export default function Chart() {
-  let canvas: HTMLCanvasElement;
+export default function Chart(props: any) {
+
+  const marketData = () => props.marketData;
+  const markers = () => props.markers || [];
+
+  const data = () => marketData().map((e: TOHLCV) => {
+    return {
+      time: e.timestamp,
+      open: e.open,
+      high: e.high,
+      low: e.low,
+      close: e.close
+    }
+  });
+
+  let chartDiv: HTMLDivElement;
 
   onMount(() => {
-    const ctx = canvas.getContext("2d")!;
+    // TODO: adjust width and height
+    const chart = createChart(chartDiv, {
+      height: 500,
+      layout: {
+        textColor: '#DDD',
+        background: { color: '#222' }
+      },
+      grid: {
+        vertLines: { color: '#444' },
+        horzLines: { color: '#444' }
+      }
+    });
 
-    ctx.moveTo(0, 0);
-    ctx.lineTo(200, 100);
-    ctx.stroke();
+
+    const lineSeries = chart.addCandlestickSeries();
+    lineSeries.setData(data());
+    lineSeries.setMarkers(markers());
   });
 
   return (
-    <canvas ref={canvas} width="800" height="600">
-    </canvas>
+    <div id="chart"
+      class="mr-4 mb-4"
+      ref={(el) => {
+        chartDiv = el;
+      }}> </div>
   );
 }
 

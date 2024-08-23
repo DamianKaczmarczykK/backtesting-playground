@@ -22,6 +22,10 @@ export interface ClosePosition extends OpenPosition {
 	endPrice: Price
 }
 
+export function profit(closePosition: ClosePosition): number {
+	return (closePosition.endPrice - closePosition.startPrice) * closePosition.quantity;
+}
+
 export interface Account {
 	initialBalance: Quantity,
 	currentBalance: Quantity,
@@ -88,8 +92,8 @@ export const DEFAULT_STRATEGY = "window['strategy'] = (index, marketData) => {\n
 
 export function runBacktesting(strategy: Strategy, marketData: MarketData, account: Account): BacktestingReport {
 	console.time("backtesting")
-	account.initialBalance = account.currentBalance;
 	const length = marketData.length();
+
 	for (let index = 0; index < length; index++) {
 		const currentCandle = marketData.at(index);
 
