@@ -178,7 +178,7 @@ export function StrategyEditor(props: any) {
             defaultValue={backtestingOptions.initialBalance}
             onRawValueChange={(value) => setBacktestingOptions({ ...backtestingOptions, initialBalance: value })}
             minValue={0}>
-            <NumberFieldLabel>Initial balance</NumberFieldLabel>
+            <NumberFieldLabel>Initial balance [{selectedMarketData().quoteSymbol}]</NumberFieldLabel>
             <div class="relative">
               <NumberFieldInput />
               <NumberFieldIncrementTrigger />

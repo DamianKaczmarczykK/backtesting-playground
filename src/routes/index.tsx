@@ -68,7 +68,7 @@ export default function Home() {
 
   return (
     <main class="mx-auto p-4 h-full">
-      <div class="flex flex-col w-full">
+      <div class="flex flex-col w-full h-full">
 
         <div class="mb-4">
           <div class="hidden sm:block">

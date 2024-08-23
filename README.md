@@ -67,5 +67,6 @@ On each feature/bulletpoint there is a number 1-3 which indicates how important 
 - [ ] (1) add example strategies as templates (use template for your strategies)
 - [ ] (2) save application configuration (loaded data, strategies) in `localStorage` or export to file
 - [ ] (1) integrate with file storage (like GDrive) to keep projects saved
+- [ ] (2) home page
 
 ## This project was created with the [Solid CLI](https://solid-cli.netlify.app)

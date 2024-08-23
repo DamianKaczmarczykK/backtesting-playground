@@ -2,7 +2,7 @@ type Timestamp = string;
 type Price = number;
 type Quantity = number;
 
-type Timepoint = { time: string, value: number }
+type Timepoint = { time: Timestamp, value: number }
 
 export interface TOHLCV {
 	time: Timestamp,
@@ -31,11 +31,15 @@ export enum PositionType {
 	SELL
 }
 
-export function profitWithoutCommission(closePosition: ClosedPosition): number {
-	if (closePosition.type === PositionType.BUY) {
-		return (closePosition.endPrice - closePosition.startPrice) * closePosition.quantity;
+export function closePositionProfitWithoutCommission(closePosition: ClosedPosition): number {
+	return positionProfitWithoutCommission(closePosition, closePosition.endPrice);
+}
+
+export function positionProfitWithoutCommission(position: OpenPosition | ClosedPosition, endPrice: number): number {
+	if (position.type === PositionType.BUY) {
+		return (endPrice - position.startPrice) * position.quantity;
 	} else {
-		return (closePosition.startPrice - closePosition.endPrice) * closePosition.quantity;
+		return (position.startPrice - endPrice) * position.quantity;
 	}
 }
 
@@ -62,6 +66,7 @@ export class Broker {
 	public marketBuy(quantity: Quantity) {
 		const currentCandle = this.marketData.last(0);
 		// OPTIMIZE: calculated double times
+		// FIX: correctly calculate margin for position
 		const positionValue = currentCandle.close * quantity;
 		// TODO: check what margin is sufficient
 		if (positionValue > this.currentBalance) {
@@ -75,6 +80,7 @@ export class Broker {
 	public marketSell(quantity: Quantity) {
 		const currentCandle = this.marketData.last(0);
 		// OPTIMIZE: calculated double times
+		// FIX: correctly calculate margin for position
 		const positionValue = currentCandle.close * quantity;
 		// TODO: check what margin is sufficient
 		if (positionValue > this.currentBalance) {
@@ -117,15 +123,12 @@ export class Broker {
 				endPrice: price,
 			};
 			this.closedPositions.push(closedPosition);
-			const positionValue = (price * openPosition.quantity);
 			// FIX: correctly calculate commission
-			const commissionValue = 0;
 			const startPositionValue = (closedPosition.startPrice * closedPosition.quantity);
-			// TODO: check if it works for BUY
-			const profit = profitWithoutCommission(closedPosition) + startPositionValue;
+			const profit = closePositionProfitWithoutCommission(closedPosition) + startPositionValue;
 			console.log("[CLOSE]" + startPositionValue)
 			console.log(profit)
-			this.currentBalance += (profit - commissionValue);
+			this.currentBalance += (profit);
 		}
 		this.openPositions = [];
 	}
@@ -203,24 +206,36 @@ window.onTick = (broker, context) => {
 	{
 		label: 'Simple sell',
 		disabled: false,
-		strategy: "window['strategy'] = (broker) => {\n\
-    const currentCandle = broker.marketData.last(0);\n\
-    if (currentCandle.close < 30000.0) {\n\
-        broker.closeAll();\n\
-    } else if (currentCandle.close > 60000.0) {\n\
-        broker.marketSell(0.1);\n\
-    }\n\
-};"
+		strategy: `// Here you initialize 'context' with indicators and request data before strategy runs
+window.initStrategy = () => {
+	return {
+		sma: new Indicators.Sma(25)
+	}
+}
+
+// Here is the definition of your strategy
+// All info about your account and marketData is kept in broker and all your defined indicators are in context
+window.onTick = (broker, context) => {
+    const currentCandle = broker.marketData.last(0); // get most recent candle
+    const sma = context.sma; // retrieve your custom objects from context
+
+    const smaValue = sma.nextValue(currentCandle.close); // calculate SMA value
+    if (currentCandle.close > 60000.0) {
+        broker.marketSell(0.1); // sell 0.1 quantity - e.g. for pair BTC-USD it's 0.1 BTC
+    } else if (currentCandle.close < 30000.0) {
+        broker.closeAll(); // close all positions
+    }
+}`,
 	}
 ];
 
-export const DEFAULT_STRATEGY = EXAMPLE_STRATEGIES[0].strategy;
+export const DEFAULT_STRATEGY = EXAMPLE_STRATEGIES[1].strategy;
 
 function calculateCurrentTotalProfit(broker: Broker) {
 	const currentCandle = broker.marketData.last(0);
 	let currentProfit = 0;
 	for (let pos of broker.openPositions) {
-		currentProfit += pos.quantity * currentCandle.close;
+		currentProfit += (pos.startPrice * pos.quantity) + positionProfitWithoutCommission(pos, currentCandle.close);
 	}
 
 	return {

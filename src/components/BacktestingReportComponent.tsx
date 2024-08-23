@@ -1,5 +1,5 @@
 import { For, Show, onMount } from "solid-js";
-import { BacktestingReport, ClosedPosition, PositionType, profitWithoutCommission } from "../services/BacktestingEngine";
+import { BacktestingReport, ClosedPosition, PositionType, closePositionProfitWithoutCommission } from "../services/BacktestingEngine";
 import { IChartApi, createChart } from "lightweight-charts";
 import { BadgeDelta } from "./ui/badge-delta";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
@@ -128,7 +128,7 @@ export default function BacktestingReportComponent(props: any) {
                 <TableCell>{fixedWithoutTrailingZeroes(position.startPrice)}</TableCell>
                 <TableCell>{fixedWithoutTrailingZeroes(position.endPrice)}</TableCell>
                 <TableCell>{fixedWithoutTrailingZeroes(position.quantity)}</TableCell>
-                <TableCell class={(profitWithoutCommission(position) > 0 ? 'text-green-500' : 'text-red-500')}>{fixedWithoutTrailingZeroes(profitWithoutCommission(position))}</TableCell>
+                <TableCell class={(closePositionProfitWithoutCommission(position) > 0 ? 'text-green-500' : 'text-red-500')}>{fixedWithoutTrailingZeroes(closePositionProfitWithoutCommission(position))}</TableCell>
               </TableRow>
             }
             </For>
