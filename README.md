@@ -8,12 +8,12 @@ Backtesting engine with exposed UI via Web. It works similar to [Backtrader](htt
 - you don't need to install anything - app works entirely in browser
 - you write strategies in JS
 
-![Preview 1](./doc/img/screenshot_1.png)
-![Preview 2](./doc/img/screenshot_2.png)
+![Preview 1](./docs/img/screenshot_1.png)
+![Preview 2](./docs/img/screenshot_2.png)
 
 ## How to use it?
 
-1. Go to page TODO: add page url
+1. Go to project page: https://DamianKaczmarczykK.github.io/backtesting-playground/
 2. Load `csv` data in [Yahoo Finance](https://finance.yahoo.com/quote/BTC-USD/history/) format(or select some provided by application)
 3. Write strategy (you can use example strategy as starter)
 4. Select backtesting params (initial balance, commission, laverage)
