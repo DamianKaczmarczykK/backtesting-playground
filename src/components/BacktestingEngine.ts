@@ -2,6 +2,8 @@ type Timestamp = string;
 type Price = number;
 type Quantity = number;
 
+type Timepoint = { time: string, value: number }
+
 export interface TOHLCV {
 	time: Timestamp,
 	open: Price,
@@ -136,7 +138,8 @@ export interface BacktestingReport {
 	equity: number,
 	commissionPercentage: number,
 	openPositions: OpenPosition[],
-	closedPositions: ClosedPosition[]
+	closedPositions: ClosedPosition[],
+	equityTimeseries: Timepoint[]
 }
 
 export class MarketData {
@@ -210,13 +213,31 @@ window.onTick = (broker, context) => {
 
 export const DEFAULT_STRATEGY = EXAMPLE_STRATEGIES[0].strategy;
 
+function calculateCurrentTotalProfit(broker: Broker) {
+	const currentCandle = broker.marketData.last(0);
+	let currentProfit = 0;
+	for (let pos of broker.openPositions) {
+		currentProfit += pos.quantity * currentCandle.close;
+	}
+
+	return {
+		time: currentCandle.time,
+		value: broker.currentBalance + currentProfit
+	}
+}
+
 export function runBacktesting(strategy: Strategy, broker: Broker): BacktestingReport {
 	console.time("backtesting")
+
+	const equityTimeseries: Timepoint[] = []
 
 	const marketData = broker.marketData;
 	const context = strategy.initStrategy();
 	do {
 		strategy.onTick(broker, context);
+
+		const currentEquity = calculateCurrentTotalProfit(broker);
+		equityTimeseries.push(currentEquity);
 	} while (marketData.next())
 
 	broker.closeAll();
@@ -229,6 +250,7 @@ export function runBacktesting(strategy: Strategy, broker: Broker): BacktestingR
 		equity: broker.currentBalance,
 		commissionPercentage: broker.commissionPercentage,
 		openPositions: broker.openPositions,
-		closedPositions: broker.closedPositions
-	};
+		closedPositions: broker.closedPositions,
+		equityTimeseries: equityTimeseries
+	}
 }

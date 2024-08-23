@@ -30,10 +30,17 @@ export default function BacktestingReportComponent(props: any) {
   let chartDiv: HTMLDivElement;
   let chart: IChartApi;
   let candlestickSeries: any;
+  let equitySeries: any = null;
 
   onMount(() => {
     chart = createChart(chartDiv, {
       height: 400,
+      rightPriceScale: {
+        visible: true
+      },
+      leftPriceScale: {
+        visible: true
+      },
       layout: {
         textColor: '#DDD',
         background: { color: '#222' }
@@ -44,9 +51,23 @@ export default function BacktestingReportComponent(props: any) {
       }
     });
 
-    candlestickSeries = chart.addCandlestickSeries();
+    if (backtestingReport()?.equityTimeseries) {
+      equitySeries = chart.addLineSeries({
+        title: 'Equity',
+        priceScaleId: 'left',
+        color: '#2962FF',
+        lineWidth: 2,
+      });
+      equitySeries.setData(backtestingReport().equityTimeseries);
+    }
+
+    candlestickSeries = chart.addCandlestickSeries({
+      title: 'Price',
+      priceScaleId: 'right'
+    });
     candlestickSeries.setData(selectedMarketData().value);
     candlestickSeries.setMarkers(markers());
+    chart.timeScale().fitContent();
   });
 
   return (
