@@ -60,16 +60,16 @@ export default function BacktestingReportComponent(props: any) {
 
 
       <div class="flex">
-        <article class="flex mr-2 flex-1 items-end justify-between rounded-lg border border-gray-100 bg-white p-6">
+        <article class="flex mr-2 flex-1 items-center justify-between rounded-lg border border-gray-100 bg-white p-6">
           <div>
-            <p class="text-sm text-gray-500">Initial balance</p>
+            <p class="ml-1 text-sm text-gray-500">Initial balance</p>
             <p class="text-2xl font-medium text-gray-900">{fixedWithoutTrailingZeroes(backtestingReport()?.initialBalance)} {backtestingReport()?.baseSymbol}</p>
           </div>
         </article>
 
-        <article class="flex ml-2 flex-1 items-end justify-between rounded-lg border border-gray-100 bg-white p-6">
-          <div>
-            <p class="text-sm text-gray-500">Equity</p>
+        <article class="flex ml-2 flex-1 items-center justify-between rounded-lg border border-gray-100 bg-white p-6">
+          <div class="justify-start">
+            <p class="ml-1 text-sm text-gray-500">Equity</p>
             <p class="text-2xl font-medium text-gray-900">{fixedWithoutTrailingZeroes(backtestingReport()?.equity)} {backtestingReport()?.baseSymbol}</p>
           </div>
 
@@ -84,14 +84,14 @@ export default function BacktestingReportComponent(props: any) {
           <TableCaption></TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead class="text-center">#</TableHead>
-              <TableHead class="text-center">Type</TableHead>
-              <TableHead class="text-center">Start date</TableHead>
-              <TableHead class="text-center">End date</TableHead>
-              <TableHead class="text-center">Start price</TableHead>
-              <TableHead class="text-center">End price</TableHead>
-              <TableHead class="text-center">Quantity [{backtestingReport()?.valueSymbol}]</TableHead>
-              <TableHead class="text-center">Profit [{backtestingReport()?.baseSymbol}]</TableHead>
+              <TableHead>#</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Start date</TableHead>
+              <TableHead>End date</TableHead>
+              <TableHead>Start price</TableHead>
+              <TableHead>End price</TableHead>
+              <TableHead>Quantity [{backtestingReport()?.valueSymbol}]</TableHead>
+              <TableHead>Profit [{backtestingReport()?.baseSymbol}]</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

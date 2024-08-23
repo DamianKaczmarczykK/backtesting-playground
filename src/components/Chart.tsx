@@ -10,7 +10,7 @@ export default function Chart(props: any) {
   onMount(() => {
     // TODO: adjust width and height
     chart = createChart(chartDiv, {
-      height: 300,
+      height: 200,
       layout: {
         textColor: '#DDD',
         background: { color: '#222' }
@@ -28,6 +28,7 @@ export default function Chart(props: any) {
   createEffect(() => {
     lineSeries.setData(props.marketData);
     lineSeries.setMarkers(props.markers || []);
+    chart.timeScale().fitContent();
   });
 
 

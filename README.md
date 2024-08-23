@@ -46,6 +46,7 @@ On each feature/bulletpoint there is a number 1-3 which indicates how important 
 - [ ] (1) autocompletion (for project types like `MarketData`, `Broker`)
 - [ ] (1) managing multiple projects within one editor
 - [ ] (1) improve strategy evaluation (show line of error, explain how to fix it similar to Rust compiler approach)
+- [ ] (1) indicate loaded elements (like progress circle when editor isn't fully loaded)
 
 ### Backtesting engine:
 

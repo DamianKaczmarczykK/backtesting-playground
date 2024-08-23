@@ -53,8 +53,8 @@ export default function Home() {
   const [markers, setMarkers] = createSignal<any>([]);
   const [currentView, setCurrentView] = createSignal(HomeView.EDITOR);
 
-  const inactiveNavClass = "shrink-0 border border-transparent p-3 text-sm font-medium text-gray-500 hover:text-gray-700";
-  const activeNavClass = "shrink-0 rounded-t-lg border border-gray-300 border-b-white p-3 text-sm font-medium text-sky-600";
+  const inactiveNavClass = "shrink-0 border border-transparent p-3 text-sm font-medium text-gray-500 hover:text-gray-800";
+  const activeNavClass = "shrink-0 rounded-t-lg border border-gray-300 border-b-white p-3 text-sm font-medium text-sky-600 bg-sky-50";
 
   createEffect(() => {
     if (backtestingReport() !== null) {
@@ -67,7 +67,7 @@ export default function Home() {
   });
 
   return (
-    <main class="text-center mx-auto p-4">
+    <main class="mx-auto p-4 h-full">
       <div class="flex flex-col w-full">
 
         <div class="mb-4">

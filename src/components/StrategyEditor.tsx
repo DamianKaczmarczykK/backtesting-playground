@@ -19,7 +19,7 @@ export function StrategyEditor(props: any) {
   const [dialogOpen, setDialogOpen] = createSignal(false);
 
   return (
-    <div class="flex">
+    <div class="flex h-full">
 
       <div class="w-3/4">
         <Editor />
@@ -32,7 +32,9 @@ export function StrategyEditor(props: any) {
           <Select
             options={marketDatas()}
             value={selectedMarketData()}
-            onChange={(option) => { console.log(option); setSelectedMarketData(option); }}
+            onChange={(option) => {
+              if (option !== null) setSelectedMarketData(option)
+            }}
             optionTextValue="label"
             optionValue="label"
             optionDisabled="disabled"
@@ -45,14 +47,16 @@ export function StrategyEditor(props: any) {
             <SelectContent />
           </Select>
 
-          <Button onClick={() => setDialogOpen(true)}>Import csv</Button>
+          <Button
+            class="mt-4"
+            onClick={() => setDialogOpen(true)}>Import csv</Button>
 
           <Dialog open={dialogOpen()} onOpenChange={setDialogOpen}>
             <DialogTrigger></DialogTrigger>
             <DialogContent class="max-w-6xl max-h-2xl">
               <DialogHeader>
-                <DialogTitle>Import market data</DialogTitle>
-                <DialogDescription><p>Select csv file in <a class="font-bold text-blue-700" href="https://finance.yahoo.com/quote/BTC-USD/history/">Yahoo Finance</a> format:</p>
+                <DialogTitle class="mb-4 font-bold text-2xl">Import market data</DialogTitle>
+                <DialogDescription><p class="text-base">Select csv file in <a class="font-bold text-blue-700" href="https://finance.yahoo.com/quote/BTC-USD/history/">Yahoo Finance</a> format:</p>
                   <p>[<b>Time</b>, <b>Open</b>, <b>High</b>, <b>Low</b>, <b>Close</b>, <b>AdjClose</b>, <b>Volume</b>]</p><br />
                   <p>Example <a
                     class="font-bold text-blue-700"
@@ -69,12 +73,14 @@ export function StrategyEditor(props: any) {
 
                   if (selectedFile === undefined) {
                     e.currentTarget.value = ''
-                    console.error(`Unexpected error in file selection: ${e}`)
-                    showToast({ title: `Import error`, variant: "destructive", description: `Unexcepted error during file loading: ${e}` })
+                    const errorMessage = `Unexcepted error during file loading: ${e}`;
+                    console.error(errorMessage);
+                    showToast({ title: `Import error`, variant: "destructive", description: errorMessage })
                   } else if (!selectedFile.name.endsWith('.csv')) {
                     e.currentTarget.value = ''
-                    console.error(`Wrong file extension: ${selectedFile.name}`)
-                    showToast({ title: `Import error`, variant: "destructive", description: `Wrong file extension for ${selectedFile.name}` })
+                    const errorMessage = `Wrong file extension for ${selectedFile.name}`;
+                    console.error(errorMessage);
+                    showToast({ title: `Import error`, variant: "destructive", description: errorMessage })
                   } else {
                     const reader = new FileReader();
                     reader.readAsText(selectedFile, "UTF-8");
@@ -96,8 +102,9 @@ export function StrategyEditor(props: any) {
                       });
                     }
                     reader.onerror = function(evt) {
-                      // TODO: implement error handling for file reading
-                      console.error("Error reading file");
+                      const errorMessage = `Error reading file: ${evt}`;
+                      console.error(errorMessage);
+                      showToast({ title: `File reading error`, variant: "destructive", description: errorMessage });
                     }
                   }
                 }
@@ -161,6 +168,7 @@ export function StrategyEditor(props: any) {
           </NumberField>
 
           { /* FIX: add step 0.001 for commission  */}
+          { /*
           <NumberField
             class="my-4"
             defaultValue={backtestingOptions.commissionPercentage}
@@ -174,8 +182,10 @@ export function StrategyEditor(props: any) {
             </div>
             <NumberFieldDescription>Commission taken on every open/close position</NumberFieldDescription>
           </NumberField>
+          */}
 
           <Button
+            class="mt-4"
             onClick={() => {
               // console.log(strategyCode);
 
