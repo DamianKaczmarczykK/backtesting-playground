@@ -141,20 +141,23 @@ export interface BacktestingReport {
 
 export class MarketData {
 	private index: number;
+	readonly valueSymbol: string;
+	readonly baseSymbol: string;
 	private data: TOHLCV[];
 
-	public constructor(data: TOHLCV[]) {
+	public constructor(data: TOHLCV[], valueSymbol: string = '', baseSymbol: string = '') {
 		this.index = 0;
 		this.data = data;
+		this.valueSymbol = valueSymbol;
+		this.baseSymbol = baseSymbol;
 	}
 
-	next() {
+	next(): boolean {
 		if (this.index + 1 >= this.data.length) {
-			return { value: this.data[this.index], done: true };
+			return false;
 		}
-		const result = { value: this.data[this.index], done: false };
 		this.index += 1;
-		return result;
+		return true;
 	}
 
 	public last(index: number): TOHLCV {
@@ -164,7 +167,8 @@ export class MarketData {
 }
 
 export interface Strategy {
-	(broker: Broker): void
+	initStrategy: () => unknown,
+	onTick: (broker: Broker, context: unknown) => void
 }
 
 export const EXAMPLE_STRATEGIES = [
@@ -172,14 +176,23 @@ export const EXAMPLE_STRATEGIES = [
 		label: 'Simple buy',
 		disabled: false,
 
-		strategy: "window['strategy'] = (broker) => {\n\
-    const currentCandle = broker.marketData.last(0);\n\
-    if (currentCandle.close < 30000.0) {\n\
-        broker.marketBuy(0.1);\n\
-    } else if (currentCandle.close > 60000.0) {\n\
-        broker.closeAll();\n\
-    }\n\
-};",
+		strategy: `window.initStrategy = () => {
+	return {
+		sma: new Indicators.Sma(25)
+	}
+}
+
+window.onTick = (broker, context) => {
+    const currentCandle = broker.marketData.last(0);
+    const sma = context.sma;
+
+    const smaValue = sma.nextValue(currentCandle.close);
+    if (currentCandle.close < 30000.0) {
+        broker.marketBuy(0.1);
+    } else if (currentCandle.close > 60000.0) {
+        broker.closeAll();
+    }
+}`,
 	},
 	{
 		label: 'Simple sell',
@@ -197,22 +210,21 @@ export const EXAMPLE_STRATEGIES = [
 
 export const DEFAULT_STRATEGY = EXAMPLE_STRATEGIES[0].strategy;
 
-export function runBacktesting(strategy: Strategy, broker: Broker, valueSymbol: string, baseSymbol: string): BacktestingReport {
+export function runBacktesting(strategy: Strategy, broker: Broker): BacktestingReport {
 	console.time("backtesting")
 
-	let iterator;
 	const marketData = broker.marketData;
+	const context = strategy.initStrategy();
 	do {
-		strategy(broker);
-		iterator = marketData.next();
-	} while (!iterator.done)
+		strategy.onTick(broker, context);
+	} while (marketData.next())
 
 	broker.closeAll();
 
 	console.timeEnd("backtesting")
 	return {
-		valueSymbol: valueSymbol,
-		baseSymbol: baseSymbol,
+		valueSymbol: marketData.valueSymbol,
+		baseSymbol: marketData.baseSymbol,
 		initialBalance: broker.initialBalance,
 		equity: broker.currentBalance,
 		commissionPercentage: broker.commissionPercentage,

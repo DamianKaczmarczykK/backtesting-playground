@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import Chart from "./Chart";
 import { parseYahooCsv } from "./DataImporter";
 import { TextField, TextFieldInput, TextFieldLabel } from "./ui/text-field";
+import { Indicators } from "~/services/Indicators";
 
 export function StrategyEditor(props: any) {
 
@@ -110,9 +111,6 @@ export function StrategyEditor(props: any) {
                     <TextFieldLabel>*Base symbol (currency of profit)</TextFieldLabel>
                     <TextFieldInput placeholder="e.g. USD" />
                   </TextField>
-
-
-
                 </Show>
 
                 <Button
@@ -165,17 +163,29 @@ export function StrategyEditor(props: any) {
           <Button
             onClick={() => {
               try {
-                const importedData = new MarketData(selectedMarketData().value);
-                console.log(strategyCode);
-                // HACK: Jesus Christ, it's taking string input, declares global variable and assign evaluated result to it - then it can be passed in rest of the code
+                const valueSymbol = selectedMarketData().valueSymbol;
+                const baseSymbol = selectedMarketData().baseSymbol;
+                const data = selectedMarketData().value;
+                const importedData = new MarketData(data, valueSymbol, baseSymbol);
+
+                // console.log(strategyCode);
+                // HACK: make indicators globally accessible as Indicators.INDICATOR_NAME
+                const windowObject = (window as any);
+                windowObject.initStrategy = null;
+                windowObject.onTick = null;
+                windowObject.Indicators = Indicators;
+
+                // HACK: Jesus Christ, it takes string input, declares global variable via window.VARIABLE_NAME - therefore evaluated result can be assigned to local variable - then it can be passed in rest of the code
                 eval(strategyCode.value);
-                const strategy: Strategy = window['strategy']
+
+                const strategy: Strategy = {
+                  initStrategy: windowObject.initStrategy,
+                  onTick: windowObject.onTick
+                };
 
                 // TODO: move below part to separated function/class
                 const broker = new Broker(importedData, backtestingOptions.initialBalance, backtestingOptions.commissionPercentage);
-                const valueSymbol = selectedMarketData().valueSymbol;
-                const baseSymbol = selectedMarketData().baseSymbol;
-                const backtestingResult = runBacktesting(strategy, broker, valueSymbol, baseSymbol);
+                const backtestingResult = runBacktesting(strategy, broker);
                 console.log(backtestingResult);
                 props.setBacktestingReport(backtestingResult);
                 setBacktestingError(null);
