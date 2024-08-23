@@ -95,12 +95,12 @@ function MarketDataImporterComponent() {
                     showToast({ title: `Import error`, variant: "destructive", description: `Importing ${selectedFile.name} result with error: ${err}` })
                     return;
                   }
-                  const [valueSymbol, baseSymbol] = detectCurrencySymbols(selectedFile.name)
+                  const [baseSymbol, quoteSymbol] = detectCurrencySymbols(selectedFile.name)
                   console.log(candleData);
                   setImportedData({
                     label: selectedFile.name,
-                    valueSymbol: valueSymbol,
                     baseSymbol: baseSymbol,
+                    quoteSymbol: quoteSymbol,
                     value: candleData,
                     disabled: false
                   });
@@ -117,23 +117,23 @@ function MarketDataImporterComponent() {
           <Show when={importedData()}>
             <Chart marketData={importedData()?.value} />
 
-            <TextField value={importedData()?.valueSymbol} onChange={(value) => setImportedData(marketDataSelection => {
+            <TextField value={importedData()?.baseSymbol} onChange={(value) => setImportedData(marketDataSelection => {
               return {
                 ...marketDataSelection!,
                 valueSymbol: value
               }
             })}>
-              <TextFieldLabel>*Value symbol (crypto, stocks)</TextFieldLabel>
+              <TextFieldLabel>*Base symbol (crypto, stocks - see {<a href="https://www.investopedia.com/terms/b/basecurrency.asp">definition</a>})</TextFieldLabel>
               <TextFieldInput placeholder="e.g. APPLE" />
             </TextField>
 
-            <TextField value={importedData()?.baseSymbol} onChange={(value) => setImportedData(marketDataSelection => {
+            <TextField value={importedData()?.quoteSymbol} onChange={(value) => setImportedData(marketDataSelection => {
               return {
                 ...marketDataSelection!,
                 baseSymbol: value
               }
             })}>
-              <TextFieldLabel>*Base symbol (currency of profit)</TextFieldLabel>
+              <TextFieldLabel>*Quote currency (currency of profit - see {<a href="https://www.investopedia.com/terms/q/quotecurrency.asp">definition</a>})</TextFieldLabel>
               <TextFieldInput placeholder="e.g. USD" />
             </TextField>
           </Show>
@@ -241,10 +241,10 @@ function runBacktestingEngine(setBacktestingReport: (backtestingReport: Backtest
     onTick: windowObject.onTick
   };
 
-  const valueSymbol = selectedMarketData().valueSymbol;
   const baseSymbol = selectedMarketData().baseSymbol;
+  const quoteSymbol = selectedMarketData().quoteSymbol;
   const data = selectedMarketData().value;
-  const importedData = new MarketData(data, valueSymbol, baseSymbol);
+  const importedData = new MarketData(data, baseSymbol, quoteSymbol);
 
   // TODO: move below part to separated function/class
   const initialBalance = backtestingOptions.initialBalance;

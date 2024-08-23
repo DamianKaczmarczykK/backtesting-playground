@@ -84,14 +84,14 @@ export default function BacktestingReportComponent(props: any) {
         <article class="flex mr-2 flex-1 items-center justify-between rounded-lg border border-gray-100 bg-white p-6">
           <div>
             <p class="ml-1 text-sm text-gray-500">Initial balance</p>
-            <p class="text-2xl font-medium text-gray-900">{fixedWithoutTrailingZeroes(backtestingReport()?.initialBalance)} {backtestingReport()?.baseSymbol}</p>
+            <p class="text-2xl font-medium text-gray-900">{fixedWithoutTrailingZeroes(backtestingReport()?.initialBalance)} {backtestingReport()?.quoteSymbol}</p>
           </div>
         </article>
 
         <article class="flex ml-2 flex-1 items-center justify-between rounded-lg border border-gray-100 bg-white p-6">
           <div class="justify-start">
             <p class="ml-1 text-sm text-gray-500">Equity</p>
-            <p class="text-2xl font-medium text-gray-900">{fixedWithoutTrailingZeroes(backtestingReport()?.equity)} {backtestingReport()?.baseSymbol}</p>
+            <p class="text-2xl font-medium text-gray-900">{fixedWithoutTrailingZeroes(backtestingReport()?.equity)} {backtestingReport()?.quoteSymbol}</p>
           </div>
 
           <Arrow backtestingReport={backtestingReport()} />
@@ -111,8 +111,8 @@ export default function BacktestingReportComponent(props: any) {
               <TableHead>End date</TableHead>
               <TableHead>Start price</TableHead>
               <TableHead>End price</TableHead>
-              <TableHead>Quantity [{backtestingReport()?.valueSymbol}]</TableHead>
-              <TableHead>Profit [{backtestingReport()?.baseSymbol}]</TableHead>
+              <TableHead>Quantity [{backtestingReport()?.baseSymbol}]</TableHead>
+              <TableHead>Profit [{backtestingReport()?.quoteSymbol}]</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -132,8 +132,8 @@ export class Broker {
 }
 
 export interface BacktestingReport {
-	valueSymbol: string,
 	baseSymbol: string,
+	quoteSymbol: string,
 	initialBalance: number,
 	equity: number,
 	commissionPercentage: number,
@@ -144,15 +144,15 @@ export interface BacktestingReport {
 
 export class MarketData {
 	private index: number;
-	readonly valueSymbol: string;
 	readonly baseSymbol: string;
+	readonly quoteSymbol: string;
 	private data: TOHLCV[];
 
-	public constructor(data: TOHLCV[], valueSymbol: string = '', baseSymbol: string = '') {
+	public constructor(data: TOHLCV[], baseSymbol: string = '', quoteSymbol: string = '') {
 		this.index = 0;
 		this.data = data;
-		this.valueSymbol = valueSymbol;
 		this.baseSymbol = baseSymbol;
+		this.quoteSymbol = quoteSymbol;
 	}
 
 	next(): boolean {
@@ -179,21 +179,24 @@ export const EXAMPLE_STRATEGIES = [
 		label: 'Simple buy',
 		disabled: false,
 
-		strategy: `window.initStrategy = () => {
+		strategy: `// Here you initialize 'context' with indicators and request data before strategy runs
+window.initStrategy = () => {
 	return {
 		sma: new Indicators.Sma(25)
 	}
 }
 
+// Here is the definition of your strategy
+// All info about your account and marketData is kept in broker and all your defined indicators are in context
 window.onTick = (broker, context) => {
-    const currentCandle = broker.marketData.last(0);
-    const sma = context.sma;
+    const currentCandle = broker.marketData.last(0); // get most recent candle
+    const sma = context.sma; // retrieve your custom objects from context
 
-    const smaValue = sma.nextValue(currentCandle.close);
+    const smaValue = sma.nextValue(currentCandle.close); // calculate SMA value
     if (currentCandle.close < 30000.0) {
-        broker.marketBuy(0.1);
+        broker.marketBuy(0.1); // buy 0.1 quantity - e.g. for pair BTC-USD it's 0.1 BTC
     } else if (currentCandle.close > 60000.0) {
-        broker.closeAll();
+        broker.closeAll(); // close all positions
     }
 }`,
 	},
@@ -244,8 +247,8 @@ export function runBacktesting(strategy: Strategy, broker: Broker): BacktestingR
 
 	console.timeEnd("backtesting")
 	return {
-		valueSymbol: marketData.valueSymbol,
 		baseSymbol: marketData.baseSymbol,
+		quoteSymbol: marketData.quoteSymbol,
 		initialBalance: broker.initialBalance,
 		equity: broker.currentBalance,
 		commissionPercentage: broker.commissionPercentage,
