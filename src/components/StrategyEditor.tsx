@@ -21,117 +21,117 @@ export function StrategyEditor(props: any) {
   const [dialogOpen, setDialogOpen] = createSignal(false);
 
   return (
-    <div>
-      <div class="flex">
+    <div class="flex">
 
-        <div class="w-1/3">
-          { /**  FIX: add validation error on empty selection and add description */}
-          <div>
-            <h1>Import market data</h1>
-            <Select
-              options={marketDatas()}
-              value={selectedMarketData()}
-              onChange={(option) => { console.log(option); setSelectedMarketData(option); }}
-              optionTextValue="label"
-              optionValue="label"
-              optionDisabled="disabled"
-              placeholder="Select market data"
-              itemComponent={(props) => <SelectItem item={props.item}>{props.item.rawValue.label}</SelectItem>}
-            >
-              <SelectTrigger aria-label="Market data">
-                <SelectValue<MarketDataSelection>>{(state) => state.selectedOption().label}</SelectValue>
-              </SelectTrigger>
-              <SelectContent />
-            </Select>
-          </div>
+      <div class="w-3/4">
+        <Editor />
+      </div>
 
+      <div class="w-1/4">
+        { /**  FIX: add validation error on empty selection and add description */}
+        <div class="flex flex-col w-full py-4">
+          <h2 class="text-xl mb-4">Import market data</h2>
+          <Select
+            options={marketDatas()}
+            value={selectedMarketData()}
+            onChange={(option) => { console.log(option); setSelectedMarketData(option); }}
+            optionTextValue="label"
+            optionValue="label"
+            optionDisabled="disabled"
+            placeholder="Select market data"
+            itemComponent={(props) => <SelectItem item={props.item}>{props.item.rawValue.label}</SelectItem>}
+          >
+            <SelectTrigger aria-label="Market data">
+              <SelectValue<MarketDataSelection>>{(state) => state.selectedOption().label}</SelectValue>
+            </SelectTrigger>
+            <SelectContent />
+          </Select>
 
+          <Button onClick={() => setDialogOpen(true)}>Import csv</Button>
 
-          <div class="w-full">
-            <Button onClick={() => setDialogOpen(true)}>Add</Button>
-            <Dialog open={dialogOpen()} onOpenChange={setDialogOpen}>
-              <DialogTrigger></DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Import market data</DialogTitle>
-                  <DialogDescription><p>Select csv file in [Time, Open, High, Low, Close, AdjClose, Volume] format</p>
-                    <p>Example <a
-                      class="font-bold text-blue-700"
-                      href="https://finance.yahoo.com/quote/BTC-USD/history/">BTC-USD</a>
-                    </p>
-                  </DialogDescription>
-                </DialogHeader>
+          <Dialog open={dialogOpen()} onOpenChange={setDialogOpen}>
+            <DialogTrigger></DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Import market data</DialogTitle>
+                <DialogDescription><p>Select csv file in [Time, Open, High, Low, Close, AdjClose, Volume] format</p>
+                  <p>Example <a
+                    class="font-bold text-blue-700"
+                    href="https://finance.yahoo.com/quote/BTC-USD/history/">BTC-USD</a>
+                  </p>
+                </DialogDescription>
+              </DialogHeader>
 
-                <input
-                  type="file"
-                  id="market-data-input"
-                  onChange={(e: any) => {
-                    const selectedFile: File = e.currentTarget.files[0];
+              <input
+                type="file"
+                id="market-data-input"
+                onChange={(e: any) => {
+                  const selectedFile: File = e.currentTarget.files[0];
 
-                    if (selectedFile !== undefined) {
-                      const reader = new FileReader();
-                      reader.readAsText(selectedFile, "UTF-8");
-                      reader.onload = function(evt) {
-                        const candleData = parseYahooCsv(evt.target.result);
-                        console.log(candleData);
-                        setImportedData({
-                          label: selectedFile.name,
-                          valueSymbol: '',
-                          baseSymbol: '',
-                          value: candleData,
-                          disabled: false
-                        });
-                      }
-                      reader.onerror = function(evt) {
-                        // TODO: implement error handling for file upload
-                      }
+                  if (selectedFile !== undefined) {
+                    const reader = new FileReader();
+                    reader.readAsText(selectedFile, "UTF-8");
+                    reader.onload = function(evt) {
+                      const candleData = parseYahooCsv(evt.target.result);
+                      console.log(candleData);
+                      setImportedData({
+                        label: selectedFile.name,
+                        valueSymbol: '',
+                        baseSymbol: '',
+                        value: candleData,
+                        disabled: false
+                      });
+                    }
+                    reader.onerror = function(evt) {
+                      // TODO: implement error handling for file upload
                     }
                   }
-                  }>Select file...</input>
+                }
+                }>Select file...</input>
 
-                <Show when={importedData()}>
-                  <Chart marketData={importedData()?.value} />
+              <Show when={importedData()}>
+                <Chart marketData={importedData()?.value} />
 
-                  <TextField value={importedData()?.valueSymbol} onChange={(value) => setImportedData(marketDataSelection => {
-                    return {
-                      ...marketDataSelection!,
-                      valueSymbol: value
-                    }
-                  })}>
-                    <TextFieldLabel>*Value symbol (crypto, stocks)</TextFieldLabel>
-                    <TextFieldInput placeholder="e.g. APPLE" />
-                  </TextField>
-
-                  <TextField value={importedData()?.baseSymbol} onChange={(value) => setImportedData(marketDataSelection => {
-                    return {
-                      ...marketDataSelection!,
-                      baseSymbol: value
-                    }
-                  })}>
-                    <TextFieldLabel>*Base symbol (currency of profit)</TextFieldLabel>
-                    <TextFieldInput placeholder="e.g. USD" />
-                  </TextField>
-                </Show>
-
-                <Button
-                  disabled={importedData() === null}
-                  onClick={() => {
-                    addMarketData(importedData()!);
-                    setSelectedMarketData(importedData()!);
-                    setImportedData(null);
-                    setDialogOpen(false);
+                <TextField value={importedData()?.valueSymbol} onChange={(value) => setImportedData(marketDataSelection => {
+                  return {
+                    ...marketDataSelection!,
+                    valueSymbol: value
                   }
+                })}>
+                  <TextFieldLabel>*Value symbol (crypto, stocks)</TextFieldLabel>
+                  <TextFieldInput placeholder="e.g. APPLE" />
+                </TextField>
+
+                <TextField value={importedData()?.baseSymbol} onChange={(value) => setImportedData(marketDataSelection => {
+                  return {
+                    ...marketDataSelection!,
+                    baseSymbol: value
                   }
-                >Import</Button>
+                })}>
+                  <TextFieldLabel>*Base symbol (currency of profit)</TextFieldLabel>
+                  <TextFieldInput placeholder="e.g. USD" />
+                </TextField>
+              </Show>
 
-              </DialogContent>
-            </Dialog>
-          </div>
+              <Button
+                disabled={importedData() === null}
+                onClick={() => {
+                  addMarketData(importedData()!);
+                  setSelectedMarketData(importedData()!);
+                  setImportedData(null);
+                  setDialogOpen(false);
+                }
+                }
+              >Import</Button>
 
+            </DialogContent>
+          </Dialog>
         </div>
 
 
-        <div class="w-1/3">
+
+        <div class="flex flex-col py-4">
+          <h2 class="text-xl mb-4">Settings</h2>
           <NumberField
             defaultValue={backtestingOptions.initialBalance}
             onRawValueChange={(value) => setBacktestingOptions({ ...backtestingOptions, initialBalance: value })}
@@ -202,22 +202,19 @@ export function StrategyEditor(props: any) {
           </Button>
 
         </div>
-
-
-        <div class="ml-8 grow">
-          <Show when={backtestingError()}>
-            <Callout variant="error" class="my-4">
-              <CalloutTitle>Error in strategy</CalloutTitle>
-              <CalloutContent>
-                {backtestingError()}
-              </CalloutContent>
-            </Callout>
-          </Show>
-        </div>
       </div>
 
 
-      <Editor />
+      <div class="ml-8 grow">
+        <Show when={backtestingError()}>
+          <Callout variant="error" class="my-4">
+            <CalloutTitle>Error in strategy</CalloutTitle>
+            <CalloutContent>
+              {backtestingError()}
+            </CalloutContent>
+          </Callout>
+        </Show>
+      </div>
 
     </div >
   );

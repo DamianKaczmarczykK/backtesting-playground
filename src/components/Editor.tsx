@@ -22,7 +22,7 @@ export default function Editor() {
     editor.setOption("enableLiveAutocompletion", true);
     // editor.setOption("enableSnippets", true);
 
-    editor.setFontSize(24);
+    editor.setFontSize(18);
     editor.setValue(strategyCode.value);
     editor.on("beforeEndOperation", function(e: any) {
       if (editor.curOp.docChanged) {
@@ -35,10 +35,12 @@ export default function Editor() {
 
   return (
     <div>
+      { /* FIX: fullscreen has limited lines in editor and overlap with elements underhood */}
       <div class={isFullscreen() ? "editor-container-fullscreen" : "editor-container"}>
         <div id="editor"></div>
       </div>
-      <Button class="absolute bottom-8 right-8"
+      <Button class="absolute bottom-8 right-8 bg-gray-100"
+        variant="outline"
         onClick={() => setIsFullscreen((val) => { editor.resize(); return !val })}>Fullscreen</Button>
     </div>
   );

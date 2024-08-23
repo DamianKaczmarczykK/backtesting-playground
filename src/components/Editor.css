@@ -6,9 +6,9 @@
 
 .editor-container {
   position: absolute;
-  top: 50%;
+  top: 10%;
   bottom: 1rem;
-  right: 50%;
+  right: 30%;
   left: 1rem;
 }
 
