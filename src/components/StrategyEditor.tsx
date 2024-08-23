@@ -208,10 +208,14 @@ export function StrategyEditor(props: any) {
               const importedData = new MarketData(data, valueSymbol, baseSymbol);
 
               // TODO: move below part to separated function/class
-              const broker = new Broker(importedData, backtestingOptions.initialBalance, backtestingOptions.commissionPercentage);
-              let backtestingResult;
+              const initialBalance = backtestingOptions.initialBalance;
+              const commissionPercentage = backtestingOptions.commissionPercentage;
+              const broker = new Broker(importedData, initialBalance, commissionPercentage);
+
               try {
-                backtestingResult = runBacktesting(strategy, broker);
+                const backtestingResult = runBacktesting(strategy, broker);
+                console.log(backtestingResult);
+                props.setBacktestingReport(backtestingResult);
               } catch (e) {
                 if (e instanceof Error) {
                   console.error(e);
@@ -219,11 +223,9 @@ export function StrategyEditor(props: any) {
                   return;
                 }
               }
-              console.log(backtestingResult);
-              props.setBacktestingReport(backtestingResult);
             }
             }
-          >Run strategy
+          >Run
           </Button>
 
         </div>

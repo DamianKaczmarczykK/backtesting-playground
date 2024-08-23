@@ -33,7 +33,7 @@ export default function BacktestingReportComponent(props: any) {
 
   onMount(() => {
     chart = createChart(chartDiv, {
-      height: 500,
+      height: 400,
       layout: {
         textColor: '#DDD',
         background: { color: '#222' }
@@ -78,9 +78,8 @@ export default function BacktestingReportComponent(props: any) {
 
       </div>
 
-      <div class="overflow-x-auto rounded-lg border border-gray-200">
-        <h1 class="text-4xl font-bold tracking-tight text-gray-900 p-6">Closed positions</h1>
-
+      { /* FIX: leave table header as non-scrollable */}
+      <div class="overflow-y-auto h-svh rounded-lg border border-gray-200">
         <Table>
           <TableCaption></TableCaption>
           <TableHeader>
@@ -96,18 +95,19 @@ export default function BacktestingReportComponent(props: any) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <For each={backtestingReport()?.closedPositions}>{(elem: ClosedPosition, index) =>
-              <TableRow onmouseover={(_e: MouseEvent) => {
-                chart.setCrosshairPosition(elem.startPrice, elem.startDate, candlestickSeries);
-              }} >
-                <TableCell>{elem.id}</TableCell>
-                <TableCell>{PositionType[elem.type]}</TableCell>
-                <TableCell>{elem.startDate}</TableCell>
-                <TableCell>{elem.endDate}</TableCell>
-                <TableCell>{fixedWithoutTrailingZeroes(elem.startPrice)}</TableCell>
-                <TableCell>{fixedWithoutTrailingZeroes(elem.endPrice)}</TableCell>
-                <TableCell>{fixedWithoutTrailingZeroes(elem.quantity)}</TableCell>
-                <TableCell class={(profitWithoutCommission(elem) > 0 ? 'text-green-500' : 'text-red-500')}>{fixedWithoutTrailingZeroes(profitWithoutCommission(elem))}</TableCell>
+            <For each={backtestingReport()?.closedPositions}>{(position: ClosedPosition, index) =>
+              <TableRow
+                onmouseover={(_e: MouseEvent) => {
+                  chart.setCrosshairPosition(position.startPrice, position.startDate, candlestickSeries);
+                }} >
+                <TableCell>{position.id}</TableCell>
+                <TableCell>{PositionType[position.type]}</TableCell>
+                <TableCell>{position.startDate}</TableCell>
+                <TableCell>{position.endDate}</TableCell>
+                <TableCell>{fixedWithoutTrailingZeroes(position.startPrice)}</TableCell>
+                <TableCell>{fixedWithoutTrailingZeroes(position.endPrice)}</TableCell>
+                <TableCell>{fixedWithoutTrailingZeroes(position.quantity)}</TableCell>
+                <TableCell class={(profitWithoutCommission(position) > 0 ? 'text-green-500' : 'text-red-500')}>{fixedWithoutTrailingZeroes(profitWithoutCommission(position))}</TableCell>
               </TableRow>
             }
             </For>
