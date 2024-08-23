@@ -4,17 +4,15 @@ import Editor from "./Editor";
 import { MarketDataSelection, addMarketData, backtestingOptions, marketDatas, selectedMarketData, setBacktestingOptions, setSelectedMarketData, strategyCode } from "./EditorStore";
 import { Button } from "./ui/button";
 import { NumberField, NumberFieldDecrementTrigger, NumberFieldDescription, NumberFieldIncrementTrigger, NumberFieldInput, NumberFieldLabel } from "./ui/number-field";
-import { Callout, CalloutContent, CalloutTitle } from "./ui/callout";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import Chart from "./Chart";
-import { parseYahooCsv } from "./DataImporter";
+import { detectCurrencySymbols, parseYahooCsv } from "./DataImporter";
 import { TextField, TextFieldInput, TextFieldLabel } from "./ui/text-field";
 import { Indicators } from "~/services/Indicators";
+import { showToast } from "./ui/toast";
 
 export function StrategyEditor(props: any) {
-
-  const [backtestingError, setBacktestingError] = createSignal<string | null>(null);
 
   // === Data Importing ===
   const [importedData, setImportedData] = createSignal<MarketDataSelection | null>(null);
@@ -27,10 +25,10 @@ export function StrategyEditor(props: any) {
         <Editor />
       </div>
 
-      <div class="w-1/4">
+      <div class="w-1/4 mx-8">
         { /**  FIX: add validation error on empty selection and add description */}
         <div class="flex flex-col w-full py-4">
-          <h2 class="text-xl mb-4">Import market data</h2>
+          <h2 class="text-xl font-bold mb-4">Import market data</h2>
           <Select
             options={marketDatas()}
             value={selectedMarketData()}
@@ -51,10 +49,11 @@ export function StrategyEditor(props: any) {
 
           <Dialog open={dialogOpen()} onOpenChange={setDialogOpen}>
             <DialogTrigger></DialogTrigger>
-            <DialogContent>
+            <DialogContent class="max-w-6xl max-h-2xl">
               <DialogHeader>
                 <DialogTitle>Import market data</DialogTitle>
-                <DialogDescription><p>Select csv file in [Time, Open, High, Low, Close, AdjClose, Volume] format</p>
+                <DialogDescription><p>Select csv file in <a class="font-bold text-blue-700" href="https://finance.yahoo.com/quote/BTC-USD/history/">Yahoo Finance</a> format:</p>
+                  <p>[<b>Time</b>, <b>Open</b>, <b>High</b>, <b>Low</b>, <b>Close</b>, <b>AdjClose</b>, <b>Volume</b>]</p><br />
                   <p>Example <a
                     class="font-bold text-blue-700"
                     href="https://finance.yahoo.com/quote/BTC-USD/history/">BTC-USD</a>
@@ -68,22 +67,37 @@ export function StrategyEditor(props: any) {
                 onChange={(e: any) => {
                   const selectedFile: File = e.currentTarget.files[0];
 
-                  if (selectedFile !== undefined) {
+                  if (selectedFile === undefined) {
+                    e.currentTarget.value = ''
+                    console.error(`Unexpected error in file selection: ${e}`)
+                    showToast({ title: `Import error`, variant: "destructive", description: `Unexcepted error during file loading: ${e}` })
+                  } else if (!selectedFile.name.endsWith('.csv')) {
+                    e.currentTarget.value = ''
+                    console.error(`Wrong file extension: ${selectedFile.name}`)
+                    showToast({ title: `Import error`, variant: "destructive", description: `Wrong file extension for ${selectedFile.name}` })
+                  } else {
                     const reader = new FileReader();
                     reader.readAsText(selectedFile, "UTF-8");
                     reader.onload = function(evt) {
-                      const candleData = parseYahooCsv(evt.target.result);
+                      const [candleData, err] = parseYahooCsv(evt.target.result);
+                      if (err !== null) {
+                        console.error(err);
+                        showToast({ title: `Import error`, variant: "destructive", description: `Importing ${selectedFile.name} result with error: ${err}` })
+                        return;
+                      }
+                      const [valueSymbol, baseSymbol] = detectCurrencySymbols(selectedFile.name)
                       console.log(candleData);
                       setImportedData({
                         label: selectedFile.name,
-                        valueSymbol: '',
-                        baseSymbol: '',
+                        valueSymbol: valueSymbol,
+                        baseSymbol: baseSymbol,
                         value: candleData,
                         disabled: false
                       });
                     }
                     reader.onerror = function(evt) {
-                      // TODO: implement error handling for file upload
+                      // TODO: implement error handling for file reading
+                      console.error("Error reading file");
                     }
                   }
                 }
@@ -120,6 +134,7 @@ export function StrategyEditor(props: any) {
                   setSelectedMarketData(importedData()!);
                   setImportedData(null);
                   setDialogOpen(false);
+                  showToast({ title: `Import success`, variant: "success", description: `${selectedMarketData().label} successfully imported` })
                 }
                 }
               >Import</Button>
@@ -131,7 +146,7 @@ export function StrategyEditor(props: any) {
 
 
         <div class="flex flex-col py-4">
-          <h2 class="text-xl mb-4">Settings</h2>
+          <h2 class="text-xl font-bold mb-4">Settings</h2>
           <NumberField
             defaultValue={backtestingOptions.initialBalance}
             onRawValueChange={(value) => setBacktestingOptions({ ...backtestingOptions, initialBalance: value })}
@@ -162,58 +177,56 @@ export function StrategyEditor(props: any) {
 
           <Button
             onClick={() => {
+              // console.log(strategyCode);
+
+              // HACK: make indicators globally accessible as Indicators.*
+              const windowObject = (window as any);
+              windowObject.initStrategy = null;
+              windowObject.onTick = null;
+              windowObject.Indicators = Indicators;
+
               try {
-                const valueSymbol = selectedMarketData().valueSymbol;
-                const baseSymbol = selectedMarketData().baseSymbol;
-                const data = selectedMarketData().value;
-                const importedData = new MarketData(data, valueSymbol, baseSymbol);
-
-                // console.log(strategyCode);
-                // HACK: make indicators globally accessible as Indicators.INDICATOR_NAME
-                const windowObject = (window as any);
-                windowObject.initStrategy = null;
-                windowObject.onTick = null;
-                windowObject.Indicators = Indicators;
-
                 // HACK: Jesus Christ, it takes string input, declares global variable via window.VARIABLE_NAME - therefore evaluated result can be assigned to local variable - then it can be passed in rest of the code
                 eval(strategyCode.value);
-
-                const strategy: Strategy = {
-                  initStrategy: windowObject.initStrategy,
-                  onTick: windowObject.onTick
-                };
-
-                // TODO: move below part to separated function/class
-                const broker = new Broker(importedData, backtestingOptions.initialBalance, backtestingOptions.commissionPercentage);
-                const backtestingResult = runBacktesting(strategy, broker);
-                console.log(backtestingResult);
-                props.setBacktestingReport(backtestingResult);
-                setBacktestingError(null);
               }
-              catch (e) {
+              catch (e: unknown) {
                 if (e instanceof Error) {
-                  setBacktestingError(`${e.name}: ${e.message}`);
                   console.error(e);
+                  showToast({ title: `JS Evaluation error`, variant: "destructive", description: `${e.name}: ${e.message}` })
+                  return;
                 }
               }
+
+              const strategy: Strategy = {
+                initStrategy: windowObject.initStrategy,
+                onTick: windowObject.onTick
+              };
+
+              const valueSymbol = selectedMarketData().valueSymbol;
+              const baseSymbol = selectedMarketData().baseSymbol;
+              const data = selectedMarketData().value;
+              const importedData = new MarketData(data, valueSymbol, baseSymbol);
+
+              // TODO: move below part to separated function/class
+              const broker = new Broker(importedData, backtestingOptions.initialBalance, backtestingOptions.commissionPercentage);
+              let backtestingResult;
+              try {
+                backtestingResult = runBacktesting(strategy, broker);
+              } catch (e) {
+                if (e instanceof Error) {
+                  console.error(e);
+                  showToast({ title: `Backtesting error`, variant: "destructive", description: `${e.name}: ${e.message}` })
+                  return;
+                }
+              }
+              console.log(backtestingResult);
+              props.setBacktestingReport(backtestingResult);
             }
             }
           >Run strategy
           </Button>
 
         </div>
-      </div>
-
-
-      <div class="ml-8 grow">
-        <Show when={backtestingError()}>
-          <Callout variant="error" class="my-4">
-            <CalloutTitle>Error in strategy</CalloutTitle>
-            <CalloutContent>
-              {backtestingError()}
-            </CalloutContent>
-          </Callout>
-        </Show>
       </div>
 
     </div >

@@ -10,7 +10,7 @@ export default function Chart(props: any) {
   onMount(() => {
     // TODO: adjust width and height
     chart = createChart(chartDiv, {
-      height: 500,
+      height: 300,
       layout: {
         textColor: '#DDD',
         background: { color: '#222' }

@@ -9,6 +9,7 @@ export default function Editor() {
 
   const [isFullscreen, setIsFullscreen] = createSignal(false);
 
+  { /* FIX: search (Ctrl+F) throws Error in application :| */ }
   onMount(async () => {
     const ace = await import("brace");
     const modeJavascript = await import('brace/mode/javascript');
