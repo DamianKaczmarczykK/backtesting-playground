@@ -1,6 +1,7 @@
-import { For, Show } from "solid-js";
-import { BacktestingReport, ClosePosition, profit } from "./BacktestingEngine";
+import { For, Show, onMount } from "solid-js";
+import { BacktestingReport, ClosePosition, TOHLCV, profit } from "./BacktestingEngine";
 import Chart from "./Chart";
+import { IChartApi, createChart } from "lightweight-charts";
 
 function UpArrow(props: any) {
   const percent = () => props.percent;
@@ -58,13 +59,46 @@ export default function BacktestingReportComponent(props: any) {
 
   const percentChange = (report: BacktestingReport) => (100 * ((report.currentBalance - report.initialBalance) / report.initialBalance)).toFixed(2);
 
+  let chartDiv: HTMLDivElement;
+  let chart: IChartApi;
+  let candlestickSeries: any;
+
+  const data = () => marketData().map((candle: TOHLCV) => {
+    return {
+      time: candle.timestamp,
+      open: candle.open,
+      high: candle.high,
+      low: candle.low,
+      close: candle.close
+    }
+  });
+
+  onMount(() => {
+    chart = createChart(chartDiv, {
+      height: 500,
+      layout: {
+        textColor: '#DDD',
+        background: { color: '#222' }
+      },
+      grid: {
+        vertLines: { color: '#444' },
+        horzLines: { color: '#444' }
+      }
+    });
+
+    candlestickSeries = chart.addCandlestickSeries();
+    candlestickSeries.setData(data());
+    candlestickSeries.setMarkers(markers());
+  });
 
   return (
     <div>
 
-      <div>
-        <Chart marketData={marketData()} markers={markers()} />
-      </div>
+      <div id="chart"
+        class="mr-4 mb-4"
+        ref={(el) => {
+          chartDiv = el;
+        }}> </div>
 
 
       <div class="flex">
@@ -107,7 +141,9 @@ export default function BacktestingReportComponent(props: any) {
           </thead>
           <tbody class="divide-y divide-gray-200">
             <For each={backtestingReport()?.closedPositions}>{(elem: ClosePosition, index) =>
-              <tr>
+              <tr onmouseover={(_e: MouseEvent) => {
+                chart.setCrosshairPosition(elem.startPrice, elem.startDate, candlestickSeries);
+              }} >
                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{elem.startDate}</td>
                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{elem.endDate}</td>
                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{elem.startPrice.toFixed(2)}</td>

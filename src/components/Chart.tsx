@@ -37,6 +37,7 @@ export default function Chart(props: any) {
     const lineSeries = chart.addCandlestickSeries();
     lineSeries.setData(data());
     lineSeries.setMarkers(markers());
+
   });
 
   return (
