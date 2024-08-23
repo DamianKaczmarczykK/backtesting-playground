@@ -165,7 +165,24 @@ export interface Strategy {
 	(broker: Broker): void
 }
 
-export const DEFAULT_STRATEGY_SELL = "window['strategy'] = (broker) => {\n\
+export const EXAMPLE_STRATEGIES = [
+	{
+		label: 'Simple buy',
+		disabled: false,
+
+		strategy: "window['strategy'] = (broker) => {\n\
+    const currentCandle = broker.marketData.last(0);\n\
+    if (currentCandle.close < 30000.0) {\n\
+        broker.marketBuy(0.1);\n\
+    } else if (currentCandle.close > 60000.0) {\n\
+        broker.closeAll();\n\
+    }\n\
+};",
+	},
+	{
+		label: 'Simple sell',
+		disabled: false,
+		strategy: "window['strategy'] = (broker) => {\n\
     const currentCandle = broker.marketData.last(0);\n\
     if (currentCandle.close < 30000.0) {\n\
         broker.closeAll();\n\
@@ -173,15 +190,10 @@ export const DEFAULT_STRATEGY_SELL = "window['strategy'] = (broker) => {\n\
         broker.marketSell(0.1);\n\
     }\n\
 };"
+	}
+];
 
-export const DEFAULT_STRATEGY = "window['strategy'] = (broker) => {\n\
-    const currentCandle = broker.marketData.last(0);\n\
-    if (currentCandle.close < 30000.0) {\n\
-        broker.marketBuy(0.1);\n\
-    } else if (currentCandle.close > 60000.0) {\n\
-        broker.closeAll();\n\
-    }\n\
-};"
+export const DEFAULT_STRATEGY = EXAMPLE_STRATEGIES[0].strategy;
 
 export function runBacktesting(strategy: Strategy, broker: Broker): BacktestingReport {
 	console.time("backtesting")

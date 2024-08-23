@@ -1,5 +1,5 @@
 import { Show, createSignal } from "solid-js";
-import { Broker as Broker, BacktestingReport, MarketData, Strategy, runBacktesting } from "./BacktestingEngine";
+import { Broker as Broker, BacktestingReport, MarketData, Strategy, runBacktesting, EXAMPLE_STRATEGIES } from "./BacktestingEngine";
 import Editor from "./Editor";
 import { backtestingOptions, setBacktestingOptions, strategyCode } from "./EditorStore";
 import { Button } from "./ui/button";
@@ -73,6 +73,7 @@ export function StrategyEditor(props: any) {
           </Button>
 
         </div>
+
 
         <div class="ml-8 grow">
           <Show when={backtestingError()}>
