@@ -1,17 +1,18 @@
-# backtesting-ts
+# backtesting-playground
 
-## Idea
+> [!NOTE]
+> It's a hobby project, currently in very alpha stage - most things `work` but there may be some small issues - see [Roadmap](#Roadmap)
+> Some elements are still not documented - I'll try to cover it when API stabilizes a little bit
 
 Backtesting engine with exposed UI via Web. It works similar to [Backtrader](https://github.com/mementum/backtrader) or [backtesting.py](https://github.com/kernc/backtesting.py) with a few important differences:
 - you don't need to install anything - app works entirely in browser
 - you write strategies in JS
-- (personal opinion) backtesting reports are more user-friendly and easier to navigate
 
 ## How to use it?
 
 1. Go to page TODO: add page url
-2. Load `csv` data (or select some default one)
-3. Write strategy (you can use example strategies as starter)
+2. Load `csv` data in [Yahoo Finance](https://finance.yahoo.com/quote/BTC-USD/history/) format(or select some provided by application)
+3. Write strategy (you can use example strategy as starter)
 4. Select backtesting params (initial balance, commission, laverage)
 5. Run backtest and analyze results 
 
@@ -28,6 +29,8 @@ pnpm run dev -- --open
 ```
 
 ## Roadmap
+
+Long-story-short - you can write your own strategy using `marketBuy()/marketSell()/closeAll()` methods and view results. Strategy is not persisted in browser (yet) so any refresh or browser close will end with progress loss. The same applies to data import.
 
 On each feature/bulletpoint there is a number 1-3 which indicates how important that feature is for next releases (1 - least important, 3 - most important)
 
@@ -69,4 +72,14 @@ On each feature/bulletpoint there is a number 1-3 which indicates how important 
 - [ ] (1) integrate with file storage (like GDrive) to keep projects saved
 - [ ] (2) home page
 
-## This project was created with the [Solid CLI](https://solid-cli.netlify.app)
+## This project is using:
+
+See [NOTICE.md](./NOTICE.md) file
+
+## Contributing
+
+Well, if you like to use this small project and wanna see more features - feel free to open Github Issue and specify:
+- `Title` - what feature you'd like to see
+- `Short description` - what is this feature about
+
+If you are more ambitous, you may create a PR (would be nice to also attach some description).

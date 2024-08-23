@@ -1,8 +1,11 @@
 import { TOHLCV } from "./BacktestingEngine";
 import btcUsdData from '../../data/BTC-USD-2021-01-01_2022-01-01.json'
-import bnbEthData from '../../data/BNB-ETH-2023-01-01_2024-01-01.json'
 import { ValueOrError } from "../services/Utils";
 
+/**
+ * Detects base and quote names from filename 
+ * E.g.: `BTC-USD-2023-2024.csv` -> `['BTC', 'USD']`
+ * */
 export function detectCurrencySymbols(filename: string): [string, string] {
 	if (filename === null || filename === undefined || filename === "") return ['', ''];
 
@@ -12,6 +15,10 @@ export function detectCurrencySymbols(filename: string): [string, string] {
 	return [splitted[0], splitted[1]]
 }
 
+/**
+ * Parses Yahoo Finance market data history format and parses it to list of candles (or retrieves an error)
+* */
+// TODO: add more checks in the function (for parsing number and column names)
 export function parseYahooCsv(csvString: string, hasHeader: boolean = true, delimiter: string = ","): ValueOrError<TOHLCV[], Error> {
 	let rows = csvString.split('\n').filter(row => row.trimEnd() !== "");
 	let result = [];
@@ -36,6 +43,9 @@ export function parseYahooCsv(csvString: string, hasHeader: boolean = true, deli
 	return [result, null];
 }
 
+/**
+ * Helper method for development - import market data from JSON
+ * */
 export function importFromJson(json: any): TOHLCV[] {
 	const result: TOHLCV[] = json.map(node => {
 		return {
@@ -52,8 +62,4 @@ export function importFromJson(json: any): TOHLCV[] {
 
 export function importBtcUsdJson(): TOHLCV[] {
 	return importFromJson(btcUsdData);
-}
-
-export function importBnbEthJson(): TOHLCV[] {
-	return importFromJson(bnbEthData);
 }

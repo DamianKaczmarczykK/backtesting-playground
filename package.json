@@ -1,5 +1,5 @@
 {
-  "name": "example-with-tailwindcss",
+  "name": "backtesting-playground",
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",

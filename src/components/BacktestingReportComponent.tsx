@@ -77,7 +77,13 @@ export default function BacktestingReportComponent(props: any) {
         class="mr-4 mb-4"
         ref={(el) => {
           chartDiv = el;
-        }}> </div>
+        }}>
+        <i class="text-gray-500">
+          Chart library created by <a
+            class="font-bold text-sky-600 hover:underline"
+            href="https://www.tradingview.com/">TradingView</a>
+        </i>
+      </div>
 
 
       <div class="flex">

@@ -4,6 +4,9 @@ type Quantity = number;
 
 type Timepoint = { time: Timestamp, value: number }
 
+/**
+ * Represents single candle 
+ * */
 export interface TOHLCV {
 	time: Timestamp,
 	open: Price,
@@ -26,6 +29,9 @@ export interface ClosedPosition extends OpenPosition {
 	endPrice: Price
 }
 
+/**
+ * In other words, long or short position
+ * */
 export enum PositionType {
 	BUY,
 	SELL
@@ -43,6 +49,9 @@ export function positionProfitWithoutCommission(position: OpenPosition | ClosedP
 	}
 }
 
+/**
+ * Keeps track of account balance, positions and provides API to manage them
+ * */
 export class Broker {
 	private idSequence: number;
 	marketData: MarketData;
@@ -63,7 +72,18 @@ export class Broker {
 		this.closedPositions = [];
 	}
 
+	public baseByBalancePercentage(percentage: number): number {
+		if (percentage <= 0.0) return 0;
+
+		const currentCandle = this.marketData.last(0);
+		const maxAvailableQuantity = (this.currentBalance / currentCandle.close);
+		// TODO: make sure currentBalance is good value in this case (it changes only when position is opened/closed, not on every candle)
+		return maxAvailableQuantity * percentage;
+	}
+
 	public marketBuy(quantity: Quantity) {
+		if (quantity - Number.EPSILON < 0) return;
+
 		const currentCandle = this.marketData.last(0);
 		// OPTIMIZE: calculated double times
 		// FIX: correctly calculate margin for position
@@ -78,6 +98,8 @@ export class Broker {
 
 	// TODO: add guards
 	public marketSell(quantity: Quantity) {
+		if (quantity - Number.EPSILON < 0) return;
+
 		const currentCandle = this.marketData.last(0);
 		// OPTIMIZE: calculated double times
 		// FIX: correctly calculate margin for position
@@ -106,8 +128,7 @@ export class Broker {
 		const positionValue = price * quantity;
 		console.log("[OPEN]" + positionValue)
 		// FIX: correctly calculate commission
-		const commissionValue = 0
-		this.currentBalance -= (positionValue + commissionValue);
+		this.currentBalance -= positionValue;
 		this.idSequence += 1;
 	}
 
@@ -127,7 +148,6 @@ export class Broker {
 			const startPositionValue = (closedPosition.startPrice * closedPosition.quantity);
 			const profit = closePositionProfitWithoutCommission(closedPosition) + startPositionValue;
 			console.log("[CLOSE]" + startPositionValue)
-			console.log(profit)
 			this.currentBalance += (profit);
 		}
 		this.openPositions = [];
@@ -145,6 +165,9 @@ export interface BacktestingReport {
 	equityTimeseries: Timepoint[]
 }
 
+/**
+ * Human-friendly wrapper for candles array
+ * */
 export class MarketData {
 	private index: number;
 	readonly baseSymbol: string;
@@ -159,7 +182,7 @@ export class MarketData {
 	}
 
 	next(): boolean {
-		if (this.index + 1 >= this.data.length) {
+		if (this.index >= this.data.length - 1) {
 			return false;
 		}
 		this.index += 1;
@@ -173,7 +196,13 @@ export class MarketData {
 }
 
 export interface Strategy {
+	/**
+	 * @returns `context` object which will be used in `onTick(broker, context)` function
+	* */
 	initStrategy: () => unknown,
+	/**
+	 * Runs on every price movement - here you define when buy/sell assets
+	* */
 	onTick: (broker: Broker, context: unknown) => void
 }
 
@@ -197,7 +226,8 @@ window.onTick = (broker, context) => {
 
     const smaValue = sma.nextValue(currentCandle.close); // calculate SMA value
     if (currentCandle.close < 30000.0) {
-        broker.marketBuy(0.1); // buy 0.1 quantity - e.g. for pair BTC-USD it's 0.1 BTC
+        const baseValue = broker.baseByBalancePercentage(0.05); // get quantity equal 5% of your available capital
+        broker.marketBuy(baseValue); // buy using 5% of your capital
     } else if (currentCandle.close > 60000.0) {
         broker.closeAll(); // close all positions
     }
@@ -229,8 +259,11 @@ window.onTick = (broker, context) => {
 	}
 ];
 
-export const DEFAULT_STRATEGY = EXAMPLE_STRATEGIES[1].strategy;
+export const DEFAULT_STRATEGY = EXAMPLE_STRATEGIES[0].strategy;
 
+/**
+ * Calculates potential profit of all opened positions without commission
+ * */
 function calculateCurrentTotalProfit(broker: Broker) {
 	const currentCandle = broker.marketData.last(0);
 	let currentProfit = 0;
@@ -244,6 +277,9 @@ function calculateCurrentTotalProfit(broker: Broker) {
 	}
 }
 
+/**
+ * Run `strategy` with defined `broker` - after iteration over `marketData` returns backtesting report
+ * */
 export function runBacktesting(strategy: Strategy, broker: Broker): BacktestingReport {
 	console.time("backtesting")
 

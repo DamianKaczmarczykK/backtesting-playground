@@ -9,6 +9,8 @@ enum HomeView {
   BACKTESTING_REPORT
 }
 
+// NOTE: it should be moved to Chart component at least
+/** Creates markers for chart like BUY/SELL/CLOSE for every opened position */
 function prepareMarkers(backtestingReport: BacktestingReport): any {
   const markersFromBuy = backtestingReport.closedPositions
     .map((position: ClosedPosition) => {
