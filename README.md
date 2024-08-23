@@ -1,12 +1,15 @@
 # backtesting-playground
 
 > [!NOTE]
-> It's a hobby project, currently in very alpha stage - most things `work` but there may be some small issues - see [Roadmap](#Roadmap)
-> Some elements are still not documented - I'll try to cover it when API stabilizes a little bit
+> It's a hobby project, currently in very alpha stage - most implemented things `work` but there may be some small issues - see [Roadmap](#Roadmap)
+> Many elements are still not documented - I'll try to cover it when API stabilizes a little bit (at least I hope so :) )
 
 Backtesting engine with exposed UI via Web. It works similar to [Backtrader](https://github.com/mementum/backtrader) or [backtesting.py](https://github.com/kernc/backtesting.py) with a few important differences:
 - you don't need to install anything - app works entirely in browser
 - you write strategies in JS
+
+![Preview 1](./doc/img/screenshot_1.png)
+![Preview 2](./doc/img/screenshot_2.png)
 
 ## How to use it?
 

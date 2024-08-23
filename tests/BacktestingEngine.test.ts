@@ -1,5 +1,5 @@
 import { importBtcUsdJson } from '../src/services/DataImporter';
-import { ClosedPosition, Broker, MarketData, PositionType, profitWithoutCommission, runBacktesting, Strategy } from '../src/services/BacktestingEngine';
+import { ClosedPosition, Broker, MarketData, PositionType, runBacktesting, Strategy, closePositionProfitWithoutCommission } from '../src/services/BacktestingEngine';
 import { describe, expect, test } from 'vitest'
 
 const closePosition: ClosedPosition = {
@@ -14,7 +14,7 @@ const closePosition: ClosedPosition = {
 
 
 test('Profit without commissions hould be 10', () => {
-	const actual = profitWithoutCommission(closePosition);
+	const actual = closePositionProfitWithoutCommission(closePosition);
 	expect(actual).toBe(10)
 })
 

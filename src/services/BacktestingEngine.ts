@@ -214,7 +214,9 @@ export const EXAMPLE_STRATEGIES = [
 		strategy: `// Here you initialize 'context' with indicators and request data before strategy runs
 window.initStrategy = () => {
 	return {
-		sma: new Indicators.Sma(25)
+		// use Indicators object to access some standard TA indicators
+		// see 'https://github.com/debut-js/Indicators' to learn, how to use them
+		sma: new Indicators.SMA(25) 
 	}
 }
 
@@ -223,12 +225,12 @@ window.initStrategy = () => {
 window.onTick = (broker, context) => {
     const currentCandle = broker.marketData.last(0); // get most recent candle
     const sma = context.sma; // retrieve your custom objects from context
-
     const smaValue = sma.nextValue(currentCandle.close); // calculate SMA value
-    if (currentCandle.close < 30000.0) {
-        const baseValue = broker.baseByBalancePercentage(0.05); // get quantity equal 5% of your available capital
-        broker.marketBuy(baseValue); // buy using 5% of your capital
-    } else if (currentCandle.close > 60000.0) {
+    
+    if (smaValue < 35000.0 && broker.openPositions.length === 0) { // open only 1 position
+        const baseValue = broker.baseByBalancePercentage(0.10); // get quantity equal 10% of your available capital
+        broker.marketBuy(baseValue); // buy using 10% of your capital
+    } else if (smaValue > 56000.0) {
         broker.closeAll(); // close all positions
     }
 }`,
@@ -239,7 +241,7 @@ window.onTick = (broker, context) => {
 		strategy: `// Here you initialize 'context' with indicators and request data before strategy runs
 window.initStrategy = () => {
 	return {
-		sma: new Indicators.Sma(25)
+		sma: new Indicators.SMA(25)
 	}
 }
 
