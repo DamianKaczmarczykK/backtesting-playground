@@ -130,6 +130,8 @@ export class Broker {
 }
 
 export interface BacktestingReport {
+	valueSymbol: string,
+	baseSymbol: string,
 	initialBalance: number,
 	equity: number,
 	commissionPercentage: number,
@@ -195,7 +197,7 @@ export const EXAMPLE_STRATEGIES = [
 
 export const DEFAULT_STRATEGY = EXAMPLE_STRATEGIES[0].strategy;
 
-export function runBacktesting(strategy: Strategy, broker: Broker): BacktestingReport {
+export function runBacktesting(strategy: Strategy, broker: Broker, valueSymbol: string, baseSymbol: string): BacktestingReport {
 	console.time("backtesting")
 
 	let iterator;
@@ -209,6 +211,8 @@ export function runBacktesting(strategy: Strategy, broker: Broker): BacktestingR
 
 	console.timeEnd("backtesting")
 	return {
+		valueSymbol: valueSymbol,
+		baseSymbol: baseSymbol,
 		initialBalance: broker.initialBalance,
 		equity: broker.currentBalance,
 		commissionPercentage: broker.commissionPercentage,

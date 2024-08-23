@@ -77,7 +77,9 @@ export function StrategyEditor(props: any) {
 
                 // TODO: move below part to separated function/class
                 const broker = new Broker(importedData, backtestingOptions.initialBalance, backtestingOptions.commissionPercentage);
-                const backtestingResult = runBacktesting(strategy, broker);
+                const valueSymbol = selectedMarketData().valueSymbol;
+                const baseSymbol = selectedMarketData().baseSymbol;
+                const backtestingResult = runBacktesting(strategy, broker, valueSymbol, baseSymbol);
                 console.log(backtestingResult);
                 setBacktestingReport(backtestingResult);
                 setBacktestingError(null);
@@ -111,6 +113,6 @@ export function StrategyEditor(props: any) {
 
       <Editor />
 
-    </div>
+    </div >
   );
 }

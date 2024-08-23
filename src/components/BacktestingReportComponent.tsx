@@ -4,6 +4,7 @@ import { IChartApi, createChart } from "lightweight-charts";
 import { BadgeDelta } from "./ui/badge-delta";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { selectedMarketData } from "./EditorStore";
+import { fixedWithoutTrailingZeroes } from "~/services/Utils";
 
 function Arrow(props: any) {
   const backtestingReport = () => props.backtestingReport;
@@ -62,14 +63,14 @@ export default function BacktestingReportComponent(props: any) {
         <article class="flex mr-2 flex-1 items-end justify-between rounded-lg border border-gray-100 bg-white p-6">
           <div>
             <p class="text-sm text-gray-500">Initial balance</p>
-            <p class="text-2xl font-medium text-gray-900">${backtestingReport()?.initialBalance}</p>
+            <p class="text-2xl font-medium text-gray-900">{fixedWithoutTrailingZeroes(backtestingReport()?.initialBalance)} {backtestingReport()?.baseSymbol}</p>
           </div>
         </article>
 
         <article class="flex ml-2 flex-1 items-end justify-between rounded-lg border border-gray-100 bg-white p-6">
           <div>
             <p class="text-sm text-gray-500">Equity</p>
-            <p class="text-2xl font-medium text-gray-900">${backtestingReport()?.equity.toFixed(2)}</p>
+            <p class="text-2xl font-medium text-gray-900">{fixedWithoutTrailingZeroes(backtestingReport()?.equity)} {backtestingReport()?.baseSymbol}</p>
           </div>
 
           <Arrow backtestingReport={backtestingReport()} />
@@ -91,8 +92,8 @@ export default function BacktestingReportComponent(props: any) {
               <TableHead class="text-center">End date</TableHead>
               <TableHead class="text-center">Start price</TableHead>
               <TableHead class="text-center">End price</TableHead>
-              <TableHead class="text-center">Quantity</TableHead>
-              <TableHead class="text-center">Profit</TableHead>
+              <TableHead class="text-center">Quantity [{backtestingReport()?.valueSymbol}]</TableHead>
+              <TableHead class="text-center">Profit [{backtestingReport()?.baseSymbol}]</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -104,10 +105,10 @@ export default function BacktestingReportComponent(props: any) {
                 <TableCell>{PositionType[elem.type]}</TableCell>
                 <TableCell>{elem.startDate}</TableCell>
                 <TableCell>{elem.endDate}</TableCell>
-                <TableCell>{elem.startPrice.toFixed(2)}</TableCell>
-                <TableCell>{elem.endPrice.toFixed(2)}</TableCell>
-                <TableCell>{elem.quantity}</TableCell>
-                <TableCell class={(profitWithoutCommission(elem) > 0 ? 'text-green-500' : 'text-red-500')}>{profitWithoutCommission(elem).toFixed(2)}</TableCell>
+                <TableCell>{fixedWithoutTrailingZeroes(elem.startPrice)}</TableCell>
+                <TableCell>{fixedWithoutTrailingZeroes(elem.endPrice)}</TableCell>
+                <TableCell>{fixedWithoutTrailingZeroes(elem.quantity)}</TableCell>
+                <TableCell class={(profitWithoutCommission(elem) > 0 ? 'text-green-500' : 'text-red-500')}>{fixedWithoutTrailingZeroes(profitWithoutCommission(elem))}</TableCell>
               </TableRow>
             }
             </For>

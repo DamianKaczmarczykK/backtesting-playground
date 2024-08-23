@@ -16,6 +16,8 @@ export const [backtestingOptions, setBacktestingOptions] = createStore({
 
 export interface MarketDataSelection {
 	label: string,
+	valueSymbol: string,
+	baseSymbol: string,
 	value: TOHLCV[],
 	disabled: boolean
 }
@@ -23,11 +25,15 @@ export interface MarketDataSelection {
 export const [marketDatas, setMarketDatas] = createSignal<MarketDataSelection[]>([
 	{
 		label: 'BTC-USD-2021-2022.json',
+		valueSymbol: 'BTC',
+		baseSymbol: 'USD',
 		value: importBtcUsdJson(),
 		disabled: false
 	},
 	{
 		label: 'BNB-ETH-2023-2024.json',
+		valueSymbol: 'BNB',
+		baseSymbol: 'ETH',
 		value: importBnbEthJson(),
 		disabled: false
 	}
