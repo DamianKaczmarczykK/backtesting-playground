@@ -42,7 +42,7 @@ On each feature/bulletpoint there is a number 1-3 which indicates how important 
 ### Editor:
 
 - [x] (3) add strategy editor in web browser
-- [ ] (1) add fullscreen mode
+- [x] (1) add fullscreen mode
 - [ ] (1) autocompletion (for project types like `MarketData`, `Broker`)
 - [ ] (1) managing multiple projects within one editor
 - [ ] (1) improve strategy evaluation (show line of error, explain how to fix it similar to Rust compiler approach)
