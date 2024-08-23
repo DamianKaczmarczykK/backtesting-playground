@@ -1,5 +1,5 @@
 import { For, Show, onMount } from "solid-js";
-import { BacktestingReport, ClosedPosition, PositionType, profitWithoutCommission } from "./BacktestingEngine";
+import { BacktestingReport, ClosedPosition, PositionType, profitWithoutCommission } from "../services/BacktestingEngine";
 import { IChartApi, createChart } from "lightweight-charts";
 import { BadgeDelta } from "./ui/badge-delta";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";

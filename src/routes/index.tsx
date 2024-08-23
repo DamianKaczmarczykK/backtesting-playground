@@ -1,5 +1,5 @@
 import { Show, createEffect, createSignal } from "solid-js";
-import { BacktestingReport, ClosedPosition, PositionType } from "~/components/BacktestingEngine";
+import { BacktestingReport, ClosedPosition, PositionType } from "~/services/BacktestingEngine";
 import BacktestingReportComponent from "~/components/BacktestingReportComponent";
 import { StrategyEditor } from "~/components/StrategyEditor";
 

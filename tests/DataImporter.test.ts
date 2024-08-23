@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { parseYahooCsv } from "../src/components/DataImporter";
+import { parseYahooCsv } from "../src/services/DataImporter";
 
 const yahooFinanceCsv = `
 Date,Open,High,Low,Close,Adj Close,Volume
@@ -27,7 +27,7 @@ Date,Open,High,Low,Close,Adj Close,Volume
 test('successfully parse csv with YahooFinance format', () => {
 	const firstCandle = { time: '2021-01-01', open: 28994.009766, high: 29600.626953, low: 28803.585938, close: 29374.152344, volume: 40730301359 };
 
-	const actual = parseYahooCsv(yahooFinanceCsv)
+	const [actual, _err] = parseYahooCsv(yahooFinanceCsv)
 
 	expect(actual).toHaveLength(19);
 	expect(actual[0])

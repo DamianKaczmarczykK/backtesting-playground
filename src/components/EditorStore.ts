@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
-import { DEFAULT_STRATEGY, TOHLCV } from "./BacktestingEngine";
-import { importBnbEthJson, importBtcUsdJson } from "./DataImporter";
+import { DEFAULT_STRATEGY, TOHLCV } from "../services/BacktestingEngine";
+import { importBnbEthJson, importBtcUsdJson } from "../services/DataImporter";
 import { createSignal } from "solid-js";
 
 export interface BacktestingOptions {

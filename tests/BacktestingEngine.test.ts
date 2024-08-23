@@ -1,5 +1,5 @@
-import { importBtcUsdJson } from '../src/components/DataImporter';
-import { ClosedPosition, Broker, MarketData, PositionType, profitWithoutCommission, runBacktesting, Strategy } from '../src/components/BacktestingEngine';
+import { importBtcUsdJson } from '../src/services/DataImporter';
+import { ClosedPosition, Broker, MarketData, PositionType, profitWithoutCommission, runBacktesting, Strategy } from '../src/services/BacktestingEngine';
 import { describe, expect, test } from 'vitest'
 
 const closePosition: ClosedPosition = {

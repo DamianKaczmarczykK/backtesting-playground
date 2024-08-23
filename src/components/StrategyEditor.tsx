@@ -1,5 +1,5 @@
 import { Show, createSignal } from "solid-js";
-import { Broker, MarketData, Strategy, runBacktesting } from "./BacktestingEngine";
+import { Broker, MarketData, Strategy, runBacktesting } from "../services/BacktestingEngine";
 import Editor from "./Editor";
 import { MarketDataSelection, addMarketData, backtestingOptions, marketDatas, selectedMarketData, setBacktestingOptions, setSelectedMarketData, strategyCode } from "./EditorStore";
 import { Button } from "./ui/button";
@@ -7,7 +7,7 @@ import { NumberField, NumberFieldDecrementTrigger, NumberFieldDescription, Numbe
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import Chart from "./Chart";
-import { detectCurrencySymbols, parseYahooCsv } from "./DataImporter";
+import { detectCurrencySymbols, parseYahooCsv } from "../services/DataImporter";
 import { TextField, TextFieldInput, TextFieldLabel } from "./ui/text-field";
 import { Indicators } from "~/services/Indicators";
 import { showToast } from "./ui/toast";
