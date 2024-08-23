@@ -42,12 +42,12 @@ function openPosition(account: Account, price: Price, time: Timestamp, quantity:
 		quantity: quantity
 	});
 	const positionValue = price * quantity;
-	account.currentBalance -= positionValue;
+	const commissionValue = positionValue * account.commission;
+	account.currentBalance -= (positionValue + commissionValue);
 }
 
 function closeAllPositions(account: Account, price: Price, time: Timestamp): void {
 	for (let openPosition of account.openPositions) {
-		const positionValue = (price * openPosition.quantity);
 		account.closedPositions.push({
 			startDate: openPosition.startDate,
 			startPrice: openPosition.startPrice,
@@ -55,7 +55,9 @@ function closeAllPositions(account: Account, price: Price, time: Timestamp): voi
 			endDate: time,
 			endPrice: price,
 		});
-		account.currentBalance += positionValue;
+		const positionValue = (price * openPosition.quantity);
+		const commissionValue = positionValue * account.commission;
+		account.currentBalance += (positionValue - commissionValue);
 	}
 	account.openPositions = [];
 }

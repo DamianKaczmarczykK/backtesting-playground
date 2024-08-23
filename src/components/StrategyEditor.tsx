@@ -6,13 +6,14 @@ function NumericInput(props: any) {
   const value = props.value;
   const setValue = props.setValue;
   const name = () => props.name;
+  const id = () => props.id;
 
   return (
     <div class="flex items-center gap-1">
       <label>{name()}
         <input
           type="number"
-          id="InitialBalance"
+          id={id()}
           value={value()}
           onChange={(e: any) => {
             setValue(e.currentTarget.value)
@@ -39,14 +40,13 @@ export function StrategyEditor(props: any) {
   const [strategyCode, setStrategyCode] = createSignal(DEFAULT_STRATEGY);
 
   const [initialBalance, setInitialBalance] = createSignal<number>(10000);
-  const [commission, setCommission] = createSignal<number>(0.00);
+  const [commission, setCommission] = createSignal<number>(0.005);
 
   return (
     <div>
-
       <div>
-        <NumericInput value={initialBalance} setValue={setInitialBalance} name="Initial balance" />
-        <NumericInput value={commission} setValue={setCommission} name="Commission" />
+        <NumericInput value={initialBalance} setValue={setInitialBalance} name="Initial balance" id="initialBalance" />
+        <NumericInput value={commission} setValue={setCommission} name="Commission" id="commission" />
       </div>
 
       <a
