@@ -23,7 +23,10 @@ npm run dev -- --open
 
 ## Roadmap
 
-- [ ] view basic candle chart from file
+- [x] view basic candle chart from file
+- [x] add strategy editor in web browser
+- [x] set initial balance and commission for backtesting
+- [x] add backtesting report with balance and postitions info
 - [ ] TODO - add more features
 
 ## Building

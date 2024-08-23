@@ -49,8 +49,7 @@ export function StrategyEditor(props: any) {
         <NumericInput value={commission} setValue={setCommission} name="Commission" id="commission" />
       </div>
 
-      <a
-        href="#"
+      <button
         onClick={() => {
           try {
             console.log(strategyCode());
@@ -62,7 +61,7 @@ export function StrategyEditor(props: any) {
             const backtestingAccount = {
               initialBalance: initialBalance(),
               currentBalance: initialBalance(),
-              commission: commission(),
+              commissionPercentage: commission(),
               openPositions: [],
               closedPositions: []
             };
@@ -81,7 +80,7 @@ export function StrategyEditor(props: any) {
         }
       >
         <span class="mt-4 block border border-current bg-gray-100 px-8 py-3">Run strategy</span>
-      </a>
+      </button>
 
       <Editor
         onEdit={(content: string) => setStrategyCode(content)}

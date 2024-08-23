@@ -1,6 +1,5 @@
 import { For, Show, onMount } from "solid-js";
-import { BacktestingReport, ClosePosition, TOHLCV, profit } from "./BacktestingEngine";
-import Chart from "./Chart";
+import { BacktestingReport, ClosedPosition, profitWithoutCommission } from "./BacktestingEngine";
 import { IChartApi, createChart } from "lightweight-charts";
 
 function UpArrow(props: any) {
@@ -51,13 +50,28 @@ function DownArrow(props: any) {
   );
 }
 
+function Arrow(props: any) {
+  const backtestingReport = () => props.backtestingReport;
+  const percentChange = (report: BacktestingReport) => (100 * ((report.equity - report.initialBalance) / report.initialBalance)).toFixed(2);
+  return (
+    <>
+      <Show when={backtestingReport()?.equity > backtestingReport()?.initialBalance}>
+        <UpArrow percent={percentChange(backtestingReport())} />
+      </Show>
+
+      <Show when={backtestingReport()?.equity < backtestingReport()?.initialBalance}>
+        <DownArrow percent={percentChange(backtestingReport())} />
+      </Show>
+    </>
+  );
+}
+
 export default function BacktestingReportComponent(props: any) {
   const backtestingReport = () => props.backtestingReport;
 
   const marketData = () => props.marketData;
   const markers = () => props.markers || [];
 
-  const percentChange = (report: BacktestingReport) => (100 * ((report.currentBalance - report.initialBalance) / report.initialBalance)).toFixed(2);
 
   let chartDiv: HTMLDivElement;
   let chart: IChartApi;
@@ -101,18 +115,13 @@ export default function BacktestingReportComponent(props: any) {
 
         <article class="flex ml-2 flex-1 items-end justify-between rounded-lg border border-gray-100 bg-white p-6">
           <div>
-            <p class="text-sm text-gray-500">Current balance</p>
-            <p class="text-2xl font-medium text-gray-900">${backtestingReport()?.currentBalance.toFixed(2)}</p>
+            <p class="text-sm text-gray-500">Equity</p>
+            <p class="text-2xl font-medium text-gray-900">${backtestingReport()?.equity.toFixed(2)}</p>
           </div>
 
-          <Show when={backtestingReport()?.currentBalance > backtestingReport()?.initialBalance}>
-            <UpArrow percent={percentChange(backtestingReport())} />
-          </Show>
-
-          <Show when={backtestingReport()?.currentBalance < backtestingReport()?.initialBalance}>
-            <DownArrow percent={percentChange(backtestingReport())} />
-          </Show>
+          <Arrow backtestingReport={backtestingReport()} />
         </article>
+
       </div>
 
       <div class="overflow-x-auto rounded-lg border border-gray-200">
@@ -130,7 +139,7 @@ export default function BacktestingReportComponent(props: any) {
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <For each={backtestingReport()?.closedPositions}>{(elem: ClosePosition, index) =>
+            <For each={backtestingReport()?.closedPositions}>{(elem: ClosedPosition, index) =>
               <tr onmouseover={(_e: MouseEvent) => {
                 chart.setCrosshairPosition(elem.startPrice, elem.startDate, candlestickSeries);
               }} >
@@ -139,7 +148,7 @@ export default function BacktestingReportComponent(props: any) {
                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{elem.startPrice.toFixed(2)}</td>
                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{elem.endPrice.toFixed(2)}</td>
                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{elem.quantity}</td>
-                <td class={(elem.endPrice > elem.startPrice ? 'text-green-500' : 'text-red-500') + " whitespace-nowrap px-4 py-2"}>{profit(elem).toFixed(2)}</td>
+                <td class={(elem.endPrice > elem.startPrice ? 'text-green-500' : 'text-red-500') + " whitespace-nowrap px-4 py-2"}>{profitWithoutCommission(elem).toFixed(2)}</td>
               </tr>
             }
             </For>

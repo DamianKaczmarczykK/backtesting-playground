@@ -17,22 +17,21 @@ export interface OpenPosition {
 	quantity: Quantity
 }
 
-export interface ClosePosition extends OpenPosition {
+export interface ClosedPosition extends OpenPosition {
 	endDate: Timestamp,
 	endPrice: Price
 }
 
-export function profit(closePosition: ClosePosition): number {
+export function profitWithoutCommission(closePosition: ClosedPosition): number {
 	return (closePosition.endPrice - closePosition.startPrice) * closePosition.quantity;
 }
 
 export interface Account {
 	initialBalance: Quantity,
 	currentBalance: Quantity,
-	// ISSUE: currently unsupported
-	commission: number,
+	commissionPercentage: number,
 	openPositions: OpenPosition[],
-	closedPositions: ClosePosition[]
+	closedPositions: ClosedPosition[]
 }
 
 function openPosition(account: Account, price: Price, time: Timestamp, quantity: Quantity): void {
@@ -42,7 +41,7 @@ function openPosition(account: Account, price: Price, time: Timestamp, quantity:
 		quantity: quantity
 	});
 	const positionValue = price * quantity;
-	const commissionValue = positionValue * account.commission;
+	const commissionValue = positionValue * account.commissionPercentage;
 	account.currentBalance -= (positionValue + commissionValue);
 }
 
@@ -56,13 +55,19 @@ function closeAllPositions(account: Account, price: Price, time: Timestamp): voi
 			endPrice: price,
 		});
 		const positionValue = (price * openPosition.quantity);
-		const commissionValue = positionValue * account.commission;
+		const commissionValue = positionValue * account.commissionPercentage;
 		account.currentBalance += (positionValue - commissionValue);
 	}
 	account.openPositions = [];
 }
 
-export interface BacktestingReport extends Account { }
+export interface BacktestingReport {
+	initialBalance: number,
+	equity: number,
+	commissionPercentage: number,
+	openPositions: OpenPosition[],
+	closedPositions: ClosedPosition[]
+}
 
 export class MarketData {
 	data: TOHLCV[];
@@ -122,8 +127,8 @@ export function runBacktesting(strategy: Strategy, marketData: MarketData, accou
 	console.timeEnd("backtesting")
 	return {
 		initialBalance: account.initialBalance,
-		currentBalance: account.currentBalance,
-		commission: account.commission,
+		equity: account.currentBalance,
+		commissionPercentage: account.commissionPercentage,
 		openPositions: account.openPositions,
 		closedPositions: account.closedPositions
 	};
