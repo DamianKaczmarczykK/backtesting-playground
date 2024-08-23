@@ -34,7 +34,7 @@ test('Run backtesting for 2021-2022 BTC/USD data', () => {
 	const broker = new Broker(marketData, 10_000, 0);
 
 	// when
-	const backtestingReport = runBacktesting(strategy, broker);
+	const backtestingReport = runBacktesting(strategy, broker, 'BTC', 'USD');
 
 	// then
 	expect(backtestingReport.initialBalance).toBe(10_000);

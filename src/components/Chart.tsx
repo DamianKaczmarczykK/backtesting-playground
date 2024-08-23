@@ -1,27 +1,15 @@
-import { createChart } from "lightweight-charts";
-import { onMount } from "solid-js";
-import { TOHLCV } from "./BacktestingEngine";
+import { IChartApi, createChart } from "lightweight-charts";
+import { createEffect, onMount } from "solid-js";
 
 export default function Chart(props: any) {
 
-  const marketData = () => props.marketData;
-  const markers = () => props.markers || [];
-
-  const data = () => marketData().map((e: TOHLCV) => {
-    return {
-      time: e.time,
-      open: e.open,
-      high: e.high,
-      low: e.low,
-      close: e.close
-    }
-  });
-
   let chartDiv: HTMLDivElement;
+  let chart: IChartApi;
+  let lineSeries: any;
 
   onMount(() => {
     // TODO: adjust width and height
-    const chart = createChart(chartDiv, {
+    chart = createChart(chartDiv, {
       height: 500,
       layout: {
         textColor: '#DDD',
@@ -33,12 +21,15 @@ export default function Chart(props: any) {
       }
     });
 
-
-    const lineSeries = chart.addCandlestickSeries();
-    lineSeries.setData(data());
-    lineSeries.setMarkers(markers());
-
+    lineSeries = chart.addCandlestickSeries();
   });
+
+  // NOTE: update main series on every data change
+  createEffect(() => {
+    lineSeries.setData(props.marketData);
+    lineSeries.setMarkers(props.markers || []);
+  });
+
 
   return (
     <div id="chart"

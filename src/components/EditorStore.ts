@@ -30,13 +30,17 @@ export const [marketDatas, setMarketDatas] = createSignal<MarketDataSelection[]>
 		value: importBtcUsdJson(),
 		disabled: false
 	},
-	{
-		label: 'BNB-ETH-2023-2024.json',
-		valueSymbol: 'BNB',
-		baseSymbol: 'ETH',
-		value: importBnbEthJson(),
-		disabled: false
-	}
+	// {
+	// 	label: 'BNB-ETH-2023-2024.json',
+	// 	valueSymbol: 'BNB',
+	// 	baseSymbol: 'ETH',
+	// 	value: importBnbEthJson(),
+	// 	disabled: false
+	// }
 ]);
 
-export const [selectedMarketData, setSelectedMarketData] = createSignal<MarketDataSelection>(marketDatas()[1]);
+export const addMarketData = (marketDataSelection: MarketDataSelection) => {
+	setMarketDatas(marketDatas => [...marketDatas, marketDataSelection]);
+};
+
+export const [selectedMarketData, setSelectedMarketData] = createSignal<MarketDataSelection>(marketDatas()[0]);

@@ -1,7 +1,6 @@
-import { Show, createEffect, createSignal, onMount } from "solid-js";
-import { BacktestingReport, ClosedPosition, PositionType, TOHLCV } from "~/components/BacktestingEngine";
+import { Show, createEffect, createSignal } from "solid-js";
+import { BacktestingReport, ClosedPosition, PositionType } from "~/components/BacktestingEngine";
 import BacktestingReportComponent from "~/components/BacktestingReportComponent";
-import { selectedMarketData } from "~/components/EditorStore";
 import { StrategyEditor } from "~/components/StrategyEditor";
 
 /** Tells which component is shown when nav button is selected */

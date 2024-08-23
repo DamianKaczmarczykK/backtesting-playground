@@ -79,7 +79,6 @@ export default function BacktestingReportComponent(props: any) {
       </div>
 
       <div class="overflow-x-auto rounded-lg border border-gray-200">
-
         <h1 class="text-4xl font-bold tracking-tight text-gray-900 p-6">Closed positions</h1>
 
         <Table>
