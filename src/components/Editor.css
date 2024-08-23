@@ -1,7 +1,10 @@
 #editor { 
   position: absolute;
-  top: 20%;
-  bottom: 10%;
-  left: 10%;
-  right: 10%;
+  width: 50%;
+  height: 50%;
+  margin-top: 2rem;
+  /* top: 20%; */
+  /* bottom: 10%; */
+  /* left: 10%; */
+  /* right: 10%; */
 }
