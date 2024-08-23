@@ -1,5 +1,5 @@
 import { For, Show, onMount } from "solid-js";
-import { BacktestingReport, ClosedPosition, profitWithoutCommission } from "./BacktestingEngine";
+import { BacktestingReport, ClosedPosition, OpenPosition, PositionType, profitWithoutCommission } from "./BacktestingEngine";
 import { IChartApi, createChart } from "lightweight-charts";
 
 function UpArrow(props: any) {
@@ -129,6 +129,7 @@ export default function BacktestingReportComponent(props: any) {
         <table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
           <thead class="ltr:text-left rtl:text-right">
             <tr>
+              <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">Type</th>
               <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">Start date</th>
               <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">End date</th>
               <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">Start price</th>
@@ -142,12 +143,13 @@ export default function BacktestingReportComponent(props: any) {
               <tr onmouseover={(_e: MouseEvent) => {
                 chart.setCrosshairPosition(elem.startPrice, elem.startDate, candlestickSeries);
               }} >
+                <td class="whitespace-nowrap px-4 py-2 text-gray-700">{PositionType[elem.type]}</td>
                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{elem.startDate}</td>
                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{elem.endDate}</td>
                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{elem.startPrice.toFixed(2)}</td>
                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{elem.endPrice.toFixed(2)}</td>
                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{elem.quantity}</td>
-                <td class={(elem.endPrice > elem.startPrice ? 'text-green-500' : 'text-red-500') + " whitespace-nowrap px-4 py-2"}>{profitWithoutCommission(elem).toFixed(2)}</td>
+                <td class={(profitWithoutCommission(elem) > 0 ? 'text-green-500' : 'text-red-500') + " whitespace-nowrap px-4 py-2"}>{profitWithoutCommission(elem).toFixed(2)}</td>
               </tr>
             }
             </For>

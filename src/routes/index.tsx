@@ -1,5 +1,5 @@
 import { Show, createEffect, createSignal, onMount } from "solid-js";
-import { BacktestingReport, ClosedPosition, TOHLCV } from "~/components/BacktestingEngine";
+import { BacktestingReport, ClosedPosition, PositionType, TOHLCV } from "~/components/BacktestingEngine";
 import BacktestingReportComponent from "~/components/BacktestingReportComponent";
 import { importFromCsv } from "~/components/DataImporter";
 import { StrategyEditor } from "~/components/StrategyEditor";
@@ -13,12 +13,23 @@ enum HomeView {
 function prepareMarkers(backtestingReport: BacktestingReport): any {
   const markersFromBuy = backtestingReport.closedPositions
     .map((position: ClosedPosition) => {
-      return {
-        time: position.startDate,
-        position: 'belowBar',
-        color: '#0af047',
-        shape: 'arrowUp',
-        text: 'BUY'
+
+      if (position.type === PositionType.BUY) {
+        return {
+          time: position.startDate,
+          position: 'belowBar',
+          color: '#0af047',
+          shape: 'arrowUp',
+          text: 'BUY'
+        }
+      } else {
+        return {
+          time: position.startDate,
+          position: 'aboveBar',
+          color: '#f0890c',
+          shape: 'arrowDown',
+          text: 'SELL'
+        }
       }
     });
 

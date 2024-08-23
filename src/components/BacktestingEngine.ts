@@ -29,7 +29,11 @@ export enum PositionType {
 }
 
 export function profitWithoutCommission(closePosition: ClosedPosition): number {
-	return (closePosition.endPrice - closePosition.startPrice) * closePosition.quantity;
+	if (closePosition.type === PositionType.BUY) {
+		return (closePosition.endPrice - closePosition.startPrice) * closePosition.quantity;
+	} else {
+		return (closePosition.startPrice - closePosition.endPrice) * closePosition.quantity;
+	}
 }
 
 export class Broker {
@@ -52,6 +56,7 @@ export class Broker {
 
 	public buy(quantity: Quantity) {
 		const currentCandle = this.marketData.last(0);
+		// OPTIMIZE: calculated double times
 		const positionValue = currentCandle.close * quantity;
 		if (this.openPositions.length > 0) {
 			console.warn("[BACKTESTING] There are too many opened positions");
@@ -66,7 +71,16 @@ export class Broker {
 	// TODO: add guards
 	public sell(quantity: Quantity) {
 		const currentCandle = this.marketData.last(0);
-		this.openPosition(PositionType.SELL, currentCandle.close, currentCandle.time, quantity);
+		// OPTIMIZE: calculated double times
+		const positionValue = currentCandle.close * quantity;
+		if (this.openPositions.length > 0) {
+			console.warn("[BACKTESTING] There are too many opened positions");
+		} else if (positionValue > this.currentBalance) {
+			console.warn("[BACKTESTING] Position value bigger than current balance");
+		}
+		else {
+			this.openPosition(PositionType.SELL, currentCandle.close, currentCandle.time, quantity);
+		}
 	}
 
 	public closeAll() {
@@ -82,25 +96,32 @@ export class Broker {
 			type: type
 		});
 		const positionValue = price * quantity;
+		console.log("[OPEN]" + positionValue)
 		// FIX: correctly calculate commission
-		const commissionValue = positionValue * this.commissionPercentage;
+		const commissionValue = 0
 		this.currentBalance -= (positionValue + commissionValue);
 	}
 
 	closeAllPositions(price: Price, time: Timestamp): void {
 		for (let openPosition of this.openPositions) {
-			this.closedPositions.push({
+			const closedPosition = {
 				startDate: openPosition.startDate,
 				startPrice: openPosition.startPrice,
 				quantity: openPosition.quantity,
 				type: openPosition.type,
 				endDate: time,
 				endPrice: price,
-			});
+			};
+			this.closedPositions.push(closedPosition);
 			const positionValue = (price * openPosition.quantity);
 			// FIX: correctly calculate commission
-			const commissionValue = positionValue * this.commissionPercentage;
-			this.currentBalance += (positionValue - commissionValue);
+			const commissionValue = 0;
+			const startPositionValue = (closedPosition.startPrice * closedPosition.quantity);
+			// TODO: check if it works for BUY
+			const profit = profitWithoutCommission(closedPosition) + startPositionValue;
+			console.log("[CLOSE]" + startPositionValue)
+			console.log(profit)
+			this.currentBalance += (profit - commissionValue);
 		}
 		this.openPositions = [];
 	}
@@ -142,6 +163,15 @@ export interface Strategy {
 	(broker: Broker): void
 }
 
+export const DEFAULT_STRATEGY_SELL = "window['strategy'] = (broker) => {\n\
+    const currentCandle = broker.marketData.last(0);\n\
+    if (currentCandle.close < 30000.0) {\n\
+        broker.closeAll();\n\
+    } else if (currentCandle.close > 60000.0) {\n\
+        broker.sell(0.1);\n\
+    }\n\
+};"
+
 export const DEFAULT_STRATEGY = "window['strategy'] = (broker) => {\n\
     const currentCandle = broker.marketData.last(0);\n\
     if (currentCandle.close < 30000.0) {\n\
@@ -160,6 +190,8 @@ export function runBacktesting(strategy: Strategy, broker: Broker): BacktestingR
 		strategy(broker);
 		iterator = marketData.next();
 	} while (!iterator.done)
+
+	broker.closeAll();
 
 	console.timeEnd("backtesting")
 	return {
