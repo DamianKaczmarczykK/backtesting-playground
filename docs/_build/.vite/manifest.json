@@ -1,0 +1,91 @@
+{
+  "_index-C3oh37l8.js": {
+    "file": "assets/index-C3oh37l8.js",
+    "name": "index",
+    "isDynamicEntry": true
+  },
+  "_javascript-BA_B0F2T.js": {
+    "file": "assets/javascript-BA_B0F2T.js",
+    "name": "javascript",
+    "isDynamicEntry": true
+  },
+  "_routing-CpSsQdcE.js": {
+    "file": "assets/routing-CpSsQdcE.js",
+    "name": "routing",
+    "imports": [
+      "_web-Kpt9dW4_.js"
+    ]
+  },
+  "_toast-4QDb3iM0.js": {
+    "file": "assets/toast-4QDb3iM0.js",
+    "name": "toast",
+    "imports": [
+      "_web-Kpt9dW4_.js"
+    ]
+  },
+  "_web-Kpt9dW4_.js": {
+    "file": "assets/web-Kpt9dW4_.js",
+    "name": "web"
+  },
+  "node_modules/.pnpm/brace@0.11.1/node_modules/brace/ext/language_tools.js": {
+    "file": "assets/language_tools-DDZ8fhKd.js",
+    "name": "language_tools",
+    "src": "node_modules/.pnpm/brace@0.11.1/node_modules/brace/ext/language_tools.js",
+    "isDynamicEntry": true
+  },
+  "node_modules/.pnpm/brace@0.11.1/node_modules/brace/theme/monokai.js": {
+    "file": "assets/monokai-F4Kfik9Y.js",
+    "name": "monokai",
+    "src": "node_modules/.pnpm/brace@0.11.1/node_modules/brace/theme/monokai.js",
+    "isDynamicEntry": true
+  },
+  "src/routes/[...404].tsx?pick=default&pick=$css": {
+    "file": "assets/_...404_-DwuNMh2_.js",
+    "name": "_...404_",
+    "src": "src/routes/[...404].tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_web-Kpt9dW4_.js",
+      "_routing-CpSsQdcE.js"
+    ]
+  },
+  "src/routes/index.tsx?pick=default&pick=$css": {
+    "file": "assets/index-ud0wz0Cw.js",
+    "name": "index",
+    "src": "src/routes/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_web-Kpt9dW4_.js",
+      "_toast-4QDb3iM0.js"
+    ],
+    "dynamicImports": [
+      "_index-C3oh37l8.js",
+      "_javascript-BA_B0F2T.js",
+      "node_modules/.pnpm/brace@0.11.1/node_modules/brace/theme/monokai.js",
+      "node_modules/.pnpm/brace@0.11.1/node_modules/brace/ext/language_tools.js"
+    ],
+    "css": [
+      "assets/index-tGRyxoeP.css"
+    ]
+  },
+  "virtual:$vinxi/handler/client": {
+    "file": "assets/client-Dkac8l5V.js",
+    "name": "client",
+    "src": "virtual:$vinxi/handler/client",
+    "isEntry": true,
+    "imports": [
+      "_web-Kpt9dW4_.js",
+      "_toast-4QDb3iM0.js",
+      "_routing-CpSsQdcE.js"
+    ],
+    "dynamicImports": [
+      "src/routes/[...404].tsx?pick=default&pick=$css",
+      "src/routes/index.tsx?pick=default&pick=$css"
+    ],
+    "css": [
+      "assets/client-DrrdJ7I_.css"
+    ]
+  }
+}

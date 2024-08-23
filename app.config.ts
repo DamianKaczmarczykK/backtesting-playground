@@ -6,6 +6,8 @@ export default defineConfig({
 		static: true,
 		prerender: {
 			crawLinks: true
-		}
+		},
+		baseURL: "/backtesting-playground",
+		preset: "static"
 	}
 });
