@@ -120,7 +120,7 @@ function MarketDataImporterComponent() {
             <TextField value={importedData()?.baseSymbol} onChange={(value) => setImportedData(marketDataSelection => {
               return {
                 ...marketDataSelection!,
-                valueSymbol: value
+                baseSymbol: value
               }
             })}>
               <TextFieldLabel>*Base symbol (crypto, stocks - see {<a href="https://www.investopedia.com/terms/b/basecurrency.asp">definition</a>})</TextFieldLabel>
@@ -130,7 +130,7 @@ function MarketDataImporterComponent() {
             <TextField value={importedData()?.quoteSymbol} onChange={(value) => setImportedData(marketDataSelection => {
               return {
                 ...marketDataSelection!,
-                baseSymbol: value
+                quoteSymbol: value
               }
             })}>
               <TextFieldLabel>*Quote currency (currency of profit - see {<a href="https://www.investopedia.com/terms/q/quotecurrency.asp">definition</a>})</TextFieldLabel>

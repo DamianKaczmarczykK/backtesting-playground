@@ -12,7 +12,10 @@ export function detectCurrencySymbols(filename: string): [string, string] {
 	const splitted = filename.split("-");
 	if (splitted.length < 2) return ['', '']
 
-	return [splitted[0], splitted[1]]
+	const base = splitted[0];
+	const quote = splitted[1].split(".")[0];
+
+	return [base, quote];
 }
 
 /**

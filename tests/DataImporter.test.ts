@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { parseYahooCsv } from "../src/services/DataImporter";
+import { detectCurrencySymbols, parseYahooCsv } from "../src/services/DataImporter";
 
 const yahooFinanceCsv = `
 Date,Open,High,Low,Close,Adj Close,Volume
@@ -32,5 +32,13 @@ test('successfully parse csv with YahooFinance format', () => {
 	expect(actual).toHaveLength(19);
 	expect(actual[0])
 		.toStrictEqual(firstCandle)
+
+})
+
+test('detect base and quote symbols', () => {
+	const [base, quote] = detectCurrencySymbols('BTC-USD.csv');
+
+	expect(base).toBe("BTC");
+	expect(quote).toBe("USD");
 
 })
